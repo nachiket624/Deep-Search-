@@ -2,7 +2,7 @@ from whoosh.qparser import QueryParser
 from whoosh.index import open_dir
 
 # Open the index directory
-index = open_dir("../Indexrecord/textindex")
+index = open_dir("../../Indexrecord/textindex")
 
 def search_index(query_text):
     with index.searcher() as searcher:
@@ -19,6 +19,6 @@ def search_index(query_text):
             print("No results found.")
 
 # Example usage
-search_index("This conspiracy has resulted in a documented decline in the health of our citizens")
+search_index(r"['Health & Fitness']")
 
 
