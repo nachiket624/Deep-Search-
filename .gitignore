@@ -10,4 +10,5 @@ wheels/
 .venv
 indexrecord/
 test/
-UI/Desing Files/
+DesingFiles/
+.idea/

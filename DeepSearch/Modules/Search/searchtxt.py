@@ -2,7 +2,8 @@ from whoosh.qparser import QueryParser
 from whoosh.index import open_dir
 
 # Open the index directory
-index = open_dir("../../Indexrecord/textindex")
+
+index = open_dir("C:/Users/nachi/Documents/deep Search/DeepSearch/Modules/Indexrecord/textindex")
 
 def search_index(query_text):
     with index.searcher() as searcher:
@@ -18,7 +19,10 @@ def search_index(query_text):
         else:
             print("No results found.")
 
-# Example usage
-search_index(r"['Health & Fitness']")
+
+def serach_text(text):
+    print("Hello")
+    search_index(str([{text}]))
 
 
+# serach_text("English Standard Version")
