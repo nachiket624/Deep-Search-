@@ -16,16 +16,16 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QGridLayout,
-    QHBoxLayout, QHeaderView, QLineEdit, QMainWindow,
-    QMenu, QMenuBar, QSizePolicy, QStatusBar,
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QHBoxLayout,
+    QHeaderView, QLineEdit, QMainWindow, QMenu,
+    QMenuBar, QPushButton, QSizePolicy, QStatusBar,
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1038, 505)
+        MainWindow.resize(1038, 503)
         MainWindow.setAnimated(False)
         self.actionView = QAction(MainWindow)
         self.actionView.setObjectName(u"actionView")
@@ -34,8 +34,10 @@ class Ui_MainWindow(object):
         self.actionMatch_Case.setCheckable(True)
         self.actionMatch_Whole_Word = QAction(MainWindow)
         self.actionMatch_Whole_Word.setObjectName(u"actionMatch_Whole_Word")
+        self.actionMatch_Whole_Word.setCheckable(True)
         self.actionMatch_Path = QAction(MainWindow)
         self.actionMatch_Path.setObjectName(u"actionMatch_Path")
+        self.actionMatch_Path.setCheckable(True)
         self.actionEnable_Regex = QAction(MainWindow)
         self.actionEnable_Regex.setObjectName(u"actionEnable_Regex")
         self.actionEverything = QAction(MainWindow)
@@ -58,15 +60,31 @@ class Ui_MainWindow(object):
         self.actionVideo.setCheckable(True)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.gridLayout = QGridLayout(self.centralwidget)
-        self.gridLayout.setObjectName(u"gridLayout")
+        self.horizontalLayout_3 = QHBoxLayout(self.centralwidget)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.lineeditsearch = QLineEdit(self.centralwidget)
         self.lineeditsearch.setObjectName(u"lineeditsearch")
 
-        self.verticalLayout.addWidget(self.lineeditsearch)
+        self.horizontalLayout_2.addWidget(self.lineeditsearch)
+
+        self.advsearchbtn = QPushButton(self.centralwidget)
+        self.advsearchbtn.setObjectName(u"advsearchbtn")
+
+        self.horizontalLayout_2.addWidget(self.advsearchbtn)
+
+        self.horizontalLayout_2.setStretch(0, 1)
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+
+
+        self.verticalLayout.addLayout(self.verticalLayout_2)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -117,7 +135,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
 
 
-        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+        self.horizontalLayout_3.addLayout(self.verticalLayout)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -169,6 +187,7 @@ class Ui_MainWindow(object):
         self.actionDocument.setText(QCoreApplication.translate("MainWindow", u"Document", None))
         self.actionPicture.setText(QCoreApplication.translate("MainWindow", u"Picture", None))
         self.actionVideo.setText(QCoreApplication.translate("MainWindow", u"Video", None))
+        self.advsearchbtn.setText("")
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Name", None));
         ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
