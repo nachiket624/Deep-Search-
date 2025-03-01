@@ -15,16 +15,17 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QDateEdit, QDialog,
-    QFormLayout, QFrame, QGridLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QCheckBox, QDateEdit,
+    QDialog, QFormLayout, QFrame, QGridLayout,
+    QHBoxLayout, QLabel, QLineEdit, QPushButton,
+    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
+    QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(768, 390)
+        Dialog.resize(833, 585)
         self.gridLayout_3 = QGridLayout(Dialog)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.verticalLayout_5 = QVBoxLayout()
@@ -37,6 +38,50 @@ class Ui_Dialog(object):
         self.gridLayout.setSpacing(5)
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setContentsMargins(5, 5, 5, 5)
+        self.verticalLayout_7 = QVBoxLayout()
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.label_4 = QLabel(self.frame)
+        self.label_4.setObjectName(u"label_4")
+
+        self.horizontalLayout_6.addWidget(self.label_4)
+
+        self.lineEdit_4 = QLineEdit(self.frame)
+        self.lineEdit_4.setObjectName(u"lineEdit_4")
+
+        self.horizontalLayout_6.addWidget(self.lineEdit_4)
+
+
+        self.verticalLayout_7.addLayout(self.horizontalLayout_6)
+
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_7.addItem(self.horizontalSpacer_3)
+
+        self.checkBox_4 = QCheckBox(self.frame)
+        self.checkBox_4.setObjectName(u"checkBox_4")
+
+        self.horizontalLayout_7.addWidget(self.checkBox_4)
+
+        self.checkBox_5 = QCheckBox(self.frame)
+        self.checkBox_5.setObjectName(u"checkBox_5")
+
+        self.horizontalLayout_7.addWidget(self.checkBox_5)
+
+        self.checkBox_6 = QCheckBox(self.frame)
+        self.checkBox_6.setObjectName(u"checkBox_6")
+
+        self.horizontalLayout_7.addWidget(self.checkBox_6)
+
+
+        self.verticalLayout_7.addLayout(self.horizontalLayout_7)
+
+
+        self.gridLayout.addLayout(self.verticalLayout_7, 2, 0, 1, 1)
+
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.verticalLayout_2 = QVBoxLayout()
@@ -57,13 +102,6 @@ class Ui_Dialog(object):
 
         self.horizontalLayout.addLayout(self.verticalLayout_2)
 
-        self.label_5 = QLabel(self.frame)
-        self.label_5.setObjectName(u"label_5")
-        self.label_5.setLayoutDirection(Qt.LeftToRight)
-        self.label_5.setAlignment(Qt.AlignCenter)
-
-        self.horizontalLayout.addWidget(self.label_5)
-
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.label_7 = QLabel(self.frame)
@@ -83,9 +121,9 @@ class Ui_Dialog(object):
         self.horizontalLayout.addLayout(self.verticalLayout_3)
 
         self.horizontalLayout.setStretch(0, 1)
-        self.horizontalLayout.setStretch(2, 1)
+        self.horizontalLayout.setStretch(1, 1)
 
-        self.gridLayout.addLayout(self.horizontalLayout, 2, 0, 1, 1)
+        self.gridLayout.addLayout(self.horizontalLayout, 6, 0, 1, 1)
 
         self.frame_2 = QFrame(self.frame)
         self.frame_2.setObjectName(u"frame_2")
@@ -95,6 +133,7 @@ class Ui_Dialog(object):
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.size = QLabel(self.frame_2)
         self.size.setObjectName(u"size")
+        self.size.setStyleSheet(u"font: 700 10pt \"Segoe UI\";")
 
         self.gridLayout_2.addWidget(self.size, 0, 0, 1, 1)
 
@@ -109,6 +148,7 @@ class Ui_Dialog(object):
 
         self.spinBox_2 = QSpinBox(self.frame_2)
         self.spinBox_2.setObjectName(u"spinBox_2")
+        self.spinBox_2.setMaximum(999999999)
 
         self.verticalLayout_4.addWidget(self.spinBox_2)
 
@@ -124,6 +164,7 @@ class Ui_Dialog(object):
 
         self.spinBox = QSpinBox(self.frame_2)
         self.spinBox.setObjectName(u"spinBox")
+        self.spinBox.setMaximum(999999999)
 
         self.verticalLayout.addWidget(self.spinBox)
 
@@ -134,12 +175,73 @@ class Ui_Dialog(object):
         self.gridLayout_2.addLayout(self.horizontalLayout_4, 1, 0, 1, 1)
 
 
-        self.gridLayout.addWidget(self.frame_2, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.frame_2, 7, 0, 1, 1)
+
+        self.verticalLayout_8 = QVBoxLayout()
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.label_5 = QLabel(self.frame)
+        self.label_5.setObjectName(u"label_5")
+        self.label_5.setStyleSheet(u"font: 700 10pt \"Segoe UI\";")
+
+        self.verticalLayout_8.addWidget(self.label_5)
+
+        self.lineEdit_5 = QLineEdit(self.frame)
+        self.lineEdit_5.setObjectName(u"lineEdit_5")
+
+        self.verticalLayout_8.addWidget(self.lineEdit_5)
+
+
+        self.gridLayout.addLayout(self.verticalLayout_8, 3, 0, 1, 1)
+
+        self.verticalLayout_6 = QVBoxLayout()
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.label_3 = QLabel(self.frame)
+        self.label_3.setObjectName(u"label_3")
+
+        self.horizontalLayout_2.addWidget(self.label_3)
+
+        self.lineEdit_3 = QLineEdit(self.frame)
+        self.lineEdit_3.setObjectName(u"lineEdit_3")
+
+        self.horizontalLayout_2.addWidget(self.lineEdit_3)
+
+
+        self.verticalLayout_6.addLayout(self.horizontalLayout_2)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
+
+        self.checkBox = QCheckBox(self.frame)
+        self.checkBox.setObjectName(u"checkBox")
+
+        self.horizontalLayout_3.addWidget(self.checkBox)
+
+        self.checkBox_2 = QCheckBox(self.frame)
+        self.checkBox_2.setObjectName(u"checkBox_2")
+
+        self.horizontalLayout_3.addWidget(self.checkBox_2)
+
+        self.checkBox_3 = QCheckBox(self.frame)
+        self.checkBox_3.setObjectName(u"checkBox_3")
+
+        self.horizontalLayout_3.addWidget(self.checkBox_3)
+
+
+        self.verticalLayout_6.addLayout(self.horizontalLayout_3)
+
+
+        self.gridLayout.addLayout(self.verticalLayout_6, 1, 0, 1, 1)
 
         self.modification = QLabel(self.frame)
         self.modification.setObjectName(u"modification")
+        self.modification.setStyleSheet(u"font: 700 10pt \"Segoe UI\";")
 
-        self.gridLayout.addWidget(self.modification, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.modification, 5, 0, 1, 1)
 
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
@@ -165,6 +267,37 @@ class Ui_Dialog(object):
 
 
         self.gridLayout.addLayout(self.formLayout, 0, 0, 1, 1)
+
+        self.verticalLayout_9 = QVBoxLayout()
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.label_11 = QLabel(self.frame)
+        self.label_11.setObjectName(u"label_11")
+        self.label_11.setStyleSheet(u"font: 700 10pt \"Segoe UI\";")
+
+        self.verticalLayout_9.addWidget(self.label_11)
+
+        self.horizontalLayout_8 = QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.lineEdit_6 = QLineEdit(self.frame)
+        self.lineEdit_6.setObjectName(u"lineEdit_6")
+
+        self.horizontalLayout_8.addWidget(self.lineEdit_6)
+
+        self.pushButton = QPushButton(self.frame)
+        self.pushButton.setObjectName(u"pushButton")
+
+        self.horizontalLayout_8.addWidget(self.pushButton)
+
+
+        self.verticalLayout_9.addLayout(self.horizontalLayout_8)
+
+        self.checkBox_7 = QCheckBox(self.frame)
+        self.checkBox_7.setObjectName(u"checkBox_7")
+
+        self.verticalLayout_9.addWidget(self.checkBox_7)
+
+
+        self.gridLayout.addLayout(self.verticalLayout_9, 4, 0, 1, 1)
 
 
         self.verticalLayout_5.addWidget(self.frame)
@@ -199,17 +332,28 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
+        self.label_4.setText(QCoreApplication.translate("Dialog", u"This Exact Phrase:", None))
+        self.checkBox_4.setText(QCoreApplication.translate("Dialog", u"Match case", None))
+        self.checkBox_5.setText(QCoreApplication.translate("Dialog", u"Match whole words", None))
+        self.checkBox_6.setText(QCoreApplication.translate("Dialog", u"Match diacribcs", None))
         self.label_6.setText(QCoreApplication.translate("Dialog", u"From", None))
         self.dateEdit.setDisplayFormat(QCoreApplication.translate("Dialog", u"yyyy/M/d", None))
-        self.label_5.setText(QCoreApplication.translate("Dialog", u"_", None))
         self.label_7.setText(QCoreApplication.translate("Dialog", u"To", None))
         self.dateEdit_2.setDisplayFormat(QCoreApplication.translate("Dialog", u"yyyy/M/d", None))
         self.size.setText(QCoreApplication.translate("Dialog", u"File Size", None))
         self.label_9.setText(QCoreApplication.translate("Dialog", u"To", None))
         self.label_8.setText(QCoreApplication.translate("Dialog", u"From", None))
+        self.label_5.setText(QCoreApplication.translate("Dialog", u"A word or phrase in the file:", None))
+        self.label_3.setText(QCoreApplication.translate("Dialog", u"All This Words", None))
+        self.checkBox.setText(QCoreApplication.translate("Dialog", u"Match case", None))
+        self.checkBox_2.setText(QCoreApplication.translate("Dialog", u"Match whole words", None))
+        self.checkBox_3.setText(QCoreApplication.translate("Dialog", u"Match diacribcs", None))
         self.modification.setText(QCoreApplication.translate("Dialog", u"Modification Date Between ", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"File Name", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"File Extension", None))
+        self.label_11.setText(QCoreApplication.translate("Dialog", u"A word or phrase in the file:", None))
+        self.pushButton.setText(QCoreApplication.translate("Dialog", u"Br...", None))
+        self.checkBox_7.setText(QCoreApplication.translate("Dialog", u"Include Sub Folder", None))
         self.digadvsearchbtn.setText("")
         self.label_10.setText(QCoreApplication.translate("Dialog", u"-", None))
     # retranslateUi
