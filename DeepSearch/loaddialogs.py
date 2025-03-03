@@ -7,5 +7,9 @@ class loadadvseach(QtWidgets.QDialog,advsearch.Ui_Dialog):
     def __init__(self):
         super(loadadvseach, self).__init__()
         self.setupUi(self)
-        adjicon = qta.icon('fa5s.search')
+        browesfile = qta.icon('ph.folder-notch-open-fill',color="yellow")
+        self.digadvborwesfile.setIcon(browesfile)
+        adjicon = qta.icon('fa5s.search',color='green')
         self.digadvsearchbtn.setIcon(adjicon)
+        cancelicon = qta.icon('mdi.cancel',color='red')
+        self.digadvcancelbtn.setIcon(cancelicon)

@@ -45,9 +45,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def tablestyle(self):
         self.tableWidget.verticalHeader().setDefaultSectionSize(30)
-        table_header = ["NameN","Path","Type","Modification Time","Size (bytes)"]
+        table_header = ["Name","Path","Type","Modification Time","Size (bytes)"]
         self.tableWidget.setHorizontalHeaderLabels(table_header)
-        column_widths = [300,600,100,300,100]  # Widths for each column
+        column_widths = [300,600,100,300,140]  # Widths for each column
         for col, width in enumerate(column_widths):
             self.tableWidget.setColumnWidth(col, width)
     # Add 'self' so it becomes an instance method
@@ -87,9 +87,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data = formatted_results
             self.loadtable()            
         else:
-            print("No matching files found.")
-
-
+            dlg = QMessageBox(self)           
+            dlg.setWindowTitle("Soory!")
+            dlg.setText("No matching files found.")
+            dlg.exec()
 
 
 

@@ -283,10 +283,10 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_8.addWidget(self.lineEdit_6)
 
-        self.pushButton = QPushButton(self.frame)
-        self.pushButton.setObjectName(u"pushButton")
+        self.digadvborwesfile = QPushButton(self.frame)
+        self.digadvborwesfile.setObjectName(u"digadvborwesfile")
 
-        self.horizontalLayout_8.addWidget(self.pushButton)
+        self.horizontalLayout_8.addWidget(self.digadvborwesfile)
 
 
         self.verticalLayout_9.addLayout(self.horizontalLayout_8)
@@ -312,6 +312,11 @@ class Ui_Dialog(object):
         self.digadvsearchbtn.setObjectName(u"digadvsearchbtn")
 
         self.horizontalLayout_5.addWidget(self.digadvsearchbtn)
+
+        self.digadvcancelbtn = QPushButton(Dialog)
+        self.digadvcancelbtn.setObjectName(u"digadvcancelbtn")
+
+        self.horizontalLayout_5.addWidget(self.digadvcancelbtn)
 
 
         self.verticalLayout_5.addLayout(self.horizontalLayout_5)
@@ -352,9 +357,10 @@ class Ui_Dialog(object):
         self.label.setText(QCoreApplication.translate("Dialog", u"File Name", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"File Extension", None))
         self.label_11.setText(QCoreApplication.translate("Dialog", u"A word or phrase in the file:", None))
-        self.pushButton.setText(QCoreApplication.translate("Dialog", u"Br...", None))
+        self.digadvborwesfile.setText("")
         self.checkBox_7.setText(QCoreApplication.translate("Dialog", u"Include Sub Folder", None))
         self.digadvsearchbtn.setText("")
+        self.digadvcancelbtn.setText("")
         self.label_10.setText(QCoreApplication.translate("Dialog", u"-", None))
     # retranslateUi
 
