@@ -10,5 +10,6 @@ dependencies = [
     "qt-material>=2.14",
     "qtawesome>=1.4.0",
     "tqdm>=4.67.1",
+    "watchdog>=3.0.0",
     "whoosh>=2.7.4",
 ]

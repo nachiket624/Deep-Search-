@@ -57,7 +57,7 @@ def index_files(directory, index_dir):
 
 # Main execution
 if __name__ == "__main__":
-    text_files_directory = "../../test/output_txt_files"  # Replace with your text files directory
+    text_files_directory = "./test"  # Replace with your text files directory
     index_directory = "../../Indexrecord/textindex"
 
     # Clear existing index directory if it exists

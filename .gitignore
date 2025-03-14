@@ -10,5 +10,6 @@ wheels/
 .venv
 indexrecord/
 test/
+test2/
 DesingFiles/
 .idea/

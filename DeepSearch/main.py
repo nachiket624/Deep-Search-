@@ -8,7 +8,6 @@ import qtawesome as qta
 # ui element
 from Mainwindow.MainWindow import Ui_MainWindow
 import loaddialogs
-from Modules.Search.searchtxt import serach_text
 from Modules.Search.simplesearch import search_files
 
 def load_index(file_path):
@@ -37,7 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data = self.load_json(json_file)  # Store data in an instance variable
         self.tableWidget.setRowCount(len(self.data))  # Number of rows based on JSON keys
         # self.tablestyle() 
-        self.loadtable()  # Call the function to populate the table
+        self.update_table()  # Call the function to populate the table
         adjicon = qta.icon('ei.adjust-alt')
         self.advsearchbtn.setIcon(adjicon)
         self.advsearchbtn.clicked.connect(self.showadvsearchdig)
@@ -54,6 +53,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def load_json(self, filename):
         with open(filename, 'r', encoding='utf-8') as file:
             return json.load(file)
+    
+    def update_table(self):
+        self.tablestyle()
+        if self.tableWidget is None:
+            return
+        self.tableWidget.setRowCount(len(self.data))  # Set row count
+        for row, entry in enumerate(self.data):
+            self.tableWidget.setItem(row, 0, QTableWidgetItem(entry.get("Name", "N/A")))
+            self.tableWidget.setItem(row, 1, QTableWidgetItem(entry.get("Path", "N/A")))
+            self.tableWidget.setItem(row, 2, QTableWidgetItem(entry.get("Type", "N/A")))
+            self.tableWidget.setItem(row, 3, QTableWidgetItem(entry.get("Modification Time", "N/A")))
+            self.tableWidget.setItem(row, 4, QTableWidgetItem(str(entry.get("Size (bytes)", "N/A"))))
 
     def loadtable(self):
         if isinstance(self.data, list):  # Ensure JSON is a list
@@ -71,7 +82,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def showadvsearchdig(self, checked):
         if self.w is None:
-            self.w = loaddialogs.loadadvseach()
+            self.w = loaddialogs.LoadAdvSearch()
         self.w.show()
 
     def Seach(self):
@@ -96,7 +107,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    apply_stylesheet(app, theme='dark_amber.xml')
+    apply_stylesheet(app, theme='dark_purple.xml')
     window = MainWindow()
     window.show()
     app.exec()
