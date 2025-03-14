@@ -1,123 +1,179 @@
 import os
-import sqlite3
-import time
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+import shutil
+import datetime
+import json
+from whoosh.index import create_in, open_dir
+from whoosh.fields import Schema, TEXT, ID, DATETIME
+from concurrent.futures import ThreadPoolExecutor
 
-# Define allowed file extensions
-ALLOWED_EXTENSIONS = {".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".alac",
-                      ".doc", ".docx", ".pdf", ".txt", ".xlsx", ".xls", ".ppt", ".pptx", ".odt", ".rtf",
-                      ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp",
-                      ".mp4", ".mkv", ".mov", ".avi", ".flv", ".wmv", ".webm", ".mpeg",
-                      ".exe", ".bat", ".sh", ".app", ".msi",
-                      ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso"}
+# Define the schema for indexing
+schema = Schema(
+    filename=TEXT(stored=True),
+    filepath=ID(stored=True, unique=True),
+    content_preview=TEXT(stored=True),
+    filetype=TEXT(stored=True),
+    modification_date=DATETIME(stored=True)
+)
 
-def create_database():
-    """Creates an SQLite database and a table to store file details."""
-    conn = sqlite3.connect("files.db")
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS files (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT,
-                        path TEXT UNIQUE,
-                        type TEXT,
-                        modification_time REAL,
-                        size INTEGER)''')
-    conn.commit()
-    conn.close()
+metadata_file = "file_metadata.json"
 
-def scan_directory(directory):
-    """Scans the directory for allowed files and populates the database."""
-    conn = sqlite3.connect("files.db")
-    cursor = conn.cursor()
-    
-    for root, _, files in os.walk(directory):
-        for file in files:
-            file_extension = os.path.splitext(file)[1].lower()
-            if file_extension in ALLOWED_EXTENSIONS:
-                filepath = os.path.join(root, file)
-                modification_time = os.path.getmtime(filepath)
-                size = os.path.getsize(filepath)
-                cursor.execute("INSERT INTO files (name, path, type, modification_time, size) VALUES (?, ?, ?, ?, ?) ON CONFLICT(path) DO UPDATE SET name=?, modification_time=?, size=?",
-                               (file, filepath, file_extension, modification_time, size, file, modification_time, size))
-    
-    conn.commit()
-    conn.close()
-
-def check_existing_records():
-    """Checks if existing records in the database still match the file system."""
-    conn = sqlite3.connect("files.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT path FROM files")
-    records = cursor.fetchall()
-    for record in records:
-        filepath = record[0]
-        if not os.path.exists(filepath):
-            cursor.execute("DELETE FROM files WHERE path = ?", (filepath,))
-        else:
-            modification_time = os.path.getmtime(filepath)
-            size = os.path.getsize(filepath)
-            cursor.execute("UPDATE files SET modification_time=?, size=? WHERE path=?",
-                           (modification_time, size, filepath))
-    conn.commit()
-    conn.close()
-
-def update_file_record(filepath):
-    """Updates or inserts file records in the database."""
-    conn = sqlite3.connect("files.db")
-    cursor = conn.cursor()
-    if os.path.exists(filepath):
-        file = os.path.basename(filepath)
-        file_extension = os.path.splitext(file)[1].lower()
-        if file_extension in ALLOWED_EXTENSIONS:
-            modification_time = os.path.getmtime(filepath)
-            size = os.path.getsize(filepath)
-            cursor.execute("INSERT INTO files (name, path, type, modification_time, size) VALUES (?, ?, ?, ?, ?) ON CONFLICT(path) DO UPDATE SET name=?, modification_time=?, size=?",
-                           (file, filepath, file_extension, modification_time, size, file, modification_time, size))
+# Function to create or open the index
+def create_or_open_index(index_dir):
+    if not os.path.exists(index_dir):
+        os.makedirs(index_dir)
+        return create_in(index_dir, schema)
     else:
-        cursor.execute("DELETE FROM files WHERE path = ?", (filepath,))
-    conn.commit()
-    conn.close()
+        return open_dir(index_dir)
 
-class FileEventHandler(FileSystemEventHandler):
-    """Handles file system events in real-time."""
-    def on_modified(self, event):
-        if not event.is_directory:
-            update_file_record(event.src_path)
-    
-    def on_created(self, event):
-        if not event.is_directory:
-            update_file_record(event.src_path)
-    
-    def on_deleted(self, event):
-        if not event.is_directory:
-            update_file_record(event.src_path)
-    
-    def on_moved(self, event):
-        if not event.is_directory:
-            update_file_record(event.dest_path)
-            update_file_record(event.src_path)
+# Load existing metadata to track file changes
+def load_metadata():
+    if os.path.exists(metadata_file):
+        with open(metadata_file, "r") as f:
+            return json.load(f)
+    return {}
 
-def main():
-    directory = input("Enter the directory path to monitor: ")
-    if not os.path.isdir(directory):
-        print("Invalid directory path!")
-        return
-    create_database()
-    scan_directory(directory)
-    check_existing_records()
-    print("Initial scan and database check complete. Now monitoring for changes...")
-    event_handler = FileEventHandler()
-    observer = Observer()
-    observer.schedule(event_handler, directory, recursive=True)
-    observer.start()
+# Save metadata after indexing
+def save_metadata(metadata):
+    with open(metadata_file, "w") as f:
+        json.dump(metadata, f, indent=4)
+
+# Get file metadata
+def get_file_metadata(filepath):
+    filename = os.path.basename(filepath)
+    filetype = os.path.splitext(filepath)[1]
+    modification_date = os.path.getmtime(filepath)  # Get timestamp
+    
+    return filename, filetype, modification_date
+
+# Index a single file
+def index_file(index_dir, filepath, metadata):
     try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
-    print("Monitoring stopped.")
+        filename, filetype, modification_date = get_file_metadata(filepath)
+        
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
 
+        content_preview = content[:200]  # Store only a snippet
+
+        # Check if the file is modified or newly added
+        if filepath in metadata and metadata[filepath]["modification_date"] == modification_date:
+            return  # No changes detected, skip indexing
+
+        # Open writer and update index
+        ix = open_dir(index_dir)
+        writer = ix.writer()
+        writer.update_document(
+            filename=filename,
+            filepath=filepath,
+            content_preview=content_preview,
+            filetype=filetype,
+            modification_date=datetime.datetime.fromtimestamp(modification_date)
+        )
+        writer.commit()
+
+        # Update metadata
+        metadata[filepath] = {
+            "filename": filename,
+            "filetype": filetype,
+            "modification_date": modification_date
+        }
+
+        print(f"Indexed: {filepath}")
+
+    except Exception as e:
+        print(f"Error indexing {filepath}: {e}")
+
+# Remove deleted files from index
+def remove_deleted_files(index_dir, metadata):
+    ix = open_dir(index_dir)
+    writer = ix.writer()
+    deleted_files = []
+
+    for filepath in list(metadata.keys()):
+        if not os.path.exists(filepath):  # File deleted
+            writer.delete_by_term("filepath", filepath)
+            deleted_files.append(filepath)
+
+    writer.commit()
+
+    # Remove deleted files from metadata
+    for filepath in deleted_files:
+        del metadata[filepath]
+        print(f"Removed from index: {filepath}")
+
+# Detect moved files and update their path in the index
+def update_moved_files(index_dir, directory, metadata):
+    existing_files = {}
+    
+    # Scan the directory to map filenames to paths
+    for root, _, files in os.walk(directory, followlinks=True):
+        for file in files:
+            filepath = os.path.join(root, file)
+            existing_files[file] = filepath  # Map filename to new path
+
+    ix = open_dir(index_dir)
+    writer = ix.writer()
+    moved_files = []
+
+    for old_path, file_data in list(metadata.items()):
+        filename = file_data["filename"]
+        
+        if filename in existing_files and existing_files[filename] != old_path:
+            new_path = existing_files[filename]
+            print(f"File moved: {old_path} → {new_path}")
+
+            # Update index with the new path
+            with open(new_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+
+            writer.update_document(
+                filename=filename,
+                filepath=new_path,
+                content_preview=content[:200],
+                filetype=file_data["filetype"],
+                modification_date=datetime.datetime.fromtimestamp(file_data["modification_date"])
+            )
+
+            moved_files.append((old_path, new_path))
+
+    writer.commit()
+
+    # Update metadata
+    for old_path, new_path in moved_files:
+        metadata[new_path] = metadata.pop(old_path)
+
+# Index all files
+def index_files(directory, index_dir):
+    index = create_or_open_index(index_dir)
+    metadata = load_metadata()
+
+    filepaths = []
+    for root, _, files in os.walk(directory, followlinks=True):
+        for file in files:
+            if file.endswith('.txt'):
+                filepaths.append(os.path.join(root, file))
+
+    # Use ThreadPoolExecutor for multithreading
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        for filepath in filepaths:
+            executor.submit(index_file, index_dir, filepath, metadata)
+
+    # Handle deletions and moved files
+    remove_deleted_files(index_dir, metadata)
+    update_moved_files(index_dir, directory, metadata)
+
+    # Save updated metadata
+    save_metadata(metadata)
+    print("Indexing completed.")
+
+# Main execution
 if __name__ == "__main__":
-    main()
+    text_files_directory = "./test"  # Replace with your text files directory
+    index_directory = "./textindex"
+
+    # Clear existing index directory if it exists
+    if os.path.exists(index_directory):
+        shutil.rmtree(index_directory)
+
+    # Recreate the index and index files
+    index_files(text_files_directory, index_directory)
