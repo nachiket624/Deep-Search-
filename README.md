@@ -69,5 +69,5 @@ This project is licensed under the MIT License. See `LICENSE` for more details.
 
 ## 📧 Contact
 
-For any issues or feature requests, please open an issue on GitHub or contact the development team at [Nachiket Parjane](mailto\:nachiket2424@gmail.com).
+For any issues or feature requests, please open an issue on GitHub or contact the development team at [Nachiket Parjane](mailto\:nachiket2424@gmail.com) and [Kartik Patare](mailto\:kartikpatare1823@gmail.com).
 
