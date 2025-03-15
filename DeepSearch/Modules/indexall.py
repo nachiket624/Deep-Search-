@@ -1,5 +1,5 @@
 import os
-import sqlite3
+import mysql.connector
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -12,23 +12,35 @@ ALLOWED_EXTENSIONS = {".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", "
                       ".exe", ".bat", ".sh", ".app", ".msi",
                       ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso"}
 
+# Database connection details
+DB_CONFIG = {
+    "host": "localhost",
+    "user": "root",  # Change this to your MySQL username
+    "password": "1900340220",  # Change this to your MySQL password
+    "database": "file_monitor"  # Change this to your MySQL database name
+}
+
+def get_db_connection():
+    """Establishes a MySQL database connection."""
+    return mysql.connector.connect(**DB_CONFIG)
+
 def create_database():
-    """Creates an SQLite database and a table to store file details."""
-    conn = sqlite3.connect("files.db")
+    """Creates a MySQL database table to store file details."""
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS files (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT,
-                        path TEXT UNIQUE,
-                        type TEXT,
-                        modification_time REAL,
-                        size INTEGER)''')
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        name VARCHAR(255),
+                        path VARCHAR(512) UNIQUE,
+                        type VARCHAR(50),
+                        modification_time DOUBLE,
+                        size BIGINT)''')
     conn.commit()
     conn.close()
 
 def scan_directory(directory):
     """Scans the directory for allowed files and populates the database."""
-    conn = sqlite3.connect("files.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     for root, _, files in os.walk(directory):
@@ -38,33 +50,36 @@ def scan_directory(directory):
                 filepath = os.path.join(root, file)
                 modification_time = os.path.getmtime(filepath)
                 size = os.path.getsize(filepath)
-                cursor.execute("INSERT INTO files (name, path, type, modification_time, size) VALUES (?, ?, ?, ?, ?) ON CONFLICT(path) DO UPDATE SET name=?, modification_time=?, size=?",
-                               (file, filepath, file_extension, modification_time, size, file, modification_time, size))
+                cursor.execute("""
+                    INSERT INTO files (name, path, type, modification_time, size)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE name=%s, modification_time=%s, size=%s
+                """, (file, filepath, file_extension, modification_time, size, file, modification_time, size))
     
     conn.commit()
     conn.close()
 
 def check_existing_records():
     """Checks if existing records in the database still match the file system."""
-    conn = sqlite3.connect("files.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT path FROM files")
     records = cursor.fetchall()
     for record in records:
         filepath = record[0]
         if not os.path.exists(filepath):
-            cursor.execute("DELETE FROM files WHERE path = ?", (filepath,))
+            cursor.execute("DELETE FROM files WHERE path = %s", (filepath,))
         else:
             modification_time = os.path.getmtime(filepath)
             size = os.path.getsize(filepath)
-            cursor.execute("UPDATE files SET modification_time=?, size=? WHERE path=?",
+            cursor.execute("UPDATE files SET modification_time=%s, size=%s WHERE path=%s",
                            (modification_time, size, filepath))
     conn.commit()
     conn.close()
 
 def update_file_record(filepath):
     """Updates or inserts file records in the database."""
-    conn = sqlite3.connect("files.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
     if os.path.exists(filepath):
         file = os.path.basename(filepath)
@@ -72,10 +87,13 @@ def update_file_record(filepath):
         if file_extension in ALLOWED_EXTENSIONS:
             modification_time = os.path.getmtime(filepath)
             size = os.path.getsize(filepath)
-            cursor.execute("INSERT INTO files (name, path, type, modification_time, size) VALUES (?, ?, ?, ?, ?) ON CONFLICT(path) DO UPDATE SET name=?, modification_time=?, size=?",
-                           (file, filepath, file_extension, modification_time, size, file, modification_time, size))
+            cursor.execute("""
+                INSERT INTO files (name, path, type, modification_time, size)
+                VALUES (%s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE name=%s, modification_time=%s, size=%s
+            """, (file, filepath, file_extension, modification_time, size, file, modification_time, size))
     else:
-        cursor.execute("DELETE FROM files WHERE path = ?", (filepath,))
+        cursor.execute("DELETE FROM files WHERE path = %s", (filepath,))
     conn.commit()
     conn.close()
 
