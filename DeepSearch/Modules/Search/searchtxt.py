@@ -1,27 +1,30 @@
 from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
 
-
-
-
 def search_files(query_str):
-    index_dir = r"./textindex"  # Ensure this matches your indexing script
+    index_dir = r"../textindex"  # Ensure this matches your indexing script
+    results_list = []
+
     try:
         ix = open_dir(index_dir)
         searcher = ix.searcher()
         query = QueryParser("content_preview", ix.schema).parse(query_str)
         results = searcher.search(query, limit=10)
         
-        print(f"Found {len(results)} result(s):")
         for result in results:
-            print(f"Filename: {result['filename']}")
-            print(f"Filepath: {result['filepath']}")
-            print(f"Snippet: {result['content_preview']}")
-            print("-" * 50)
+            results_list.append([
+                result["filename"],
+                result["filepath"],
+                result["content_preview"]
+            ])
         
         searcher.close()
+    
     except Exception as e:
         print(f"Error during search: {e}")
+    return results_list # Return results as a list
+
+
 
 # Main execution
 # if __name__ == "__main__":
