@@ -2,7 +2,7 @@ from PySide6 import QtWidgets
 from PySide6.QtWidgets import *
 from Mainwindow.Dialogs import advsearch, textresult
 import qtawesome as qta
-from Modules.Search.searchtxt import search_index
+from Modules.Search.searchtxt import search_files
 
 class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
     def __init__(self, phrase=""):
@@ -11,7 +11,7 @@ class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
         self.display_search_phrase(phrase)
 
     def display_search_phrase(self, phrase):
-        data = search_index(phrase)
+        data = search_files(phrase)
         # print(data)
         self.tableWidget.setRowCount(len(data))  # Set rows
         self.tableWidget.setColumnCount(3)  # 3 Columns for title, path, and content preview

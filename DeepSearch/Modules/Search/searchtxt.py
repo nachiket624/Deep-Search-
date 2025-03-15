@@ -1,7 +1,11 @@
 from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
 
-def search_files(index_dir, query_str):
+
+
+
+def search_files(query_str):
+    index_dir = r"./textindex"  # Ensure this matches your indexing script
     try:
         ix = open_dir(index_dir)
         searcher = ix.searcher()
@@ -20,7 +24,7 @@ def search_files(index_dir, query_str):
         print(f"Error during search: {e}")
 
 # Main execution
-if __name__ == "__main__":
-    index_directory = r"./textindex"  # Ensure this matches your indexing script
-    search_query = "Eothen is the earliest work of Alexander William Kinglake"
-    search_files(index_directory, search_query)
+# if __name__ == "__main__":
+#     index_directory = r"./textindex"  # Ensure this matches your indexing script
+#     search_query = "Eothen is the earliest work of Alexander William Kinglake"
+#     search_files(index_directory, search_query)
