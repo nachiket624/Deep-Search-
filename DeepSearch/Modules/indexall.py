@@ -1,6 +1,7 @@
 import os
 import mysql.connector
 import time
+from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -33,10 +34,12 @@ def create_database():
                         name VARCHAR(255),
                         path VARCHAR(512) UNIQUE,
                         type VARCHAR(50),
-                        modification_time DOUBLE,
+                        modification_time Datetime,
                         size BIGINT)''')
     conn.commit()
     conn.close()
+def formatdate(filedatetime):
+    return datetime.fromtimestamp(filedatetime).strftime('%Y-%m-%d %H:%M:%S')
 
 def scan_directory(directory):
     """Scans the directory for allowed files and populates the database."""
@@ -48,13 +51,14 @@ def scan_directory(directory):
             file_extension = os.path.splitext(file)[1].lower()
             if file_extension in ALLOWED_EXTENSIONS:
                 filepath = os.path.join(root, file)
-                modification_time = os.path.getmtime(filepath)
+                modification_time = datetime.fromtimestamp(os.path.getmtime(filepath))
                 size = os.path.getsize(filepath)
                 cursor.execute("""
-                    INSERT INTO files (name, path, type, modification_time, size)
-                    VALUES (%s, %s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE name=%s, modification_time=%s, size=%s
-                """, (file, filepath, file_extension, modification_time, size, file, modification_time, size))
+                            INSERT INTO files (name, path, type, modification_time, size)
+                            VALUES (%s, %s, %s, %s, %s)
+                            ON DUPLICATE KEY UPDATE name=%s, modification_time=%s, size=%s
+                        """, (file, filepath, file_extension, modification_time, size, file, modification_time, size))
+
     
     conn.commit()
     conn.close()
@@ -70,7 +74,7 @@ def check_existing_records():
         if not os.path.exists(filepath):
             cursor.execute("DELETE FROM files WHERE path = %s", (filepath,))
         else:
-            modification_time = os.path.getmtime(filepath)
+            modification_time = datetime.fromtimestamp(os.path.getmtime(filepath))
             size = os.path.getsize(filepath)
             cursor.execute("UPDATE files SET modification_time=%s, size=%s WHERE path=%s",
                            (modification_time, size, filepath))
@@ -86,6 +90,7 @@ def update_file_record(filepath):
         file_extension = os.path.splitext(file)[1].lower()
         if file_extension in ALLOWED_EXTENSIONS:
             modification_time = os.path.getmtime(filepath)
+            modification_time = formatdate(modification_time)
             size = os.path.getsize(filepath)
             cursor.execute("""
                 INSERT INTO files (name, path, type, modification_time, size)
