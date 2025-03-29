@@ -6,8 +6,11 @@ readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
     "mysql-connector-python>=8.0.33",
+    "pyinstaller>=5.13.2",
+    "pyinstaller-hooks-contrib>=2024.7",
     "pyside6>=6.5.3",
     "python-docx>=1.1.0",
+    "python-dotenv>=0.21.1",
     "qt-material>=2.14",
     "qtawesome>=1.4.0",
     "tqdm>=4.67.1",

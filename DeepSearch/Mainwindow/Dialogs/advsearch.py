@@ -15,17 +15,19 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QCheckBox, QDateEdit,
-    QDialog, QFormLayout, QFrame, QGridLayout,
-    QHBoxLayout, QLabel, QLineEdit, QPushButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QCheckBox, QComboBox,
+    QDateEdit, QDialog, QFormLayout, QFrame,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+    QPushButton, QSizePolicy, QSpacerItem, QSpinBox,
+    QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(833, 585)
+        Dialog.resize(814, 585)
+        Dialog.setSizeGripEnabled(True)
+        Dialog.setModal(True)
         self.gridLayout_3 = QGridLayout(Dialog)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.verticalLayout_5 = QVBoxLayout()
@@ -47,10 +49,10 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_6.addWidget(self.label_4)
 
-        self.lineEdit_4 = QLineEdit(self.frame)
-        self.lineEdit_4.setObjectName(u"lineEdit_4")
+        self.excludewords = QLineEdit(self.frame)
+        self.excludewords.setObjectName(u"excludewords")
 
-        self.horizontalLayout_6.addWidget(self.lineEdit_4)
+        self.horizontalLayout_6.addWidget(self.excludewords)
 
 
         self.verticalLayout_7.addLayout(self.horizontalLayout_6)
@@ -71,10 +73,10 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_7.addWidget(self.fileexactmactchwholeword)
 
-        self.checkBox_6 = QCheckBox(self.frame)
-        self.checkBox_6.setObjectName(u"checkBox_6")
+        self.fileexactmatchdiacribcs = QCheckBox(self.frame)
+        self.fileexactmatchdiacribcs.setObjectName(u"fileexactmatchdiacribcs")
 
-        self.horizontalLayout_7.addWidget(self.checkBox_6)
+        self.horizontalLayout_7.addWidget(self.fileexactmatchdiacribcs)
 
 
         self.verticalLayout_7.addLayout(self.horizontalLayout_7)
@@ -96,6 +98,7 @@ class Ui_Dialog(object):
         self.startdate.setWrapping(True)
         self.startdate.setFrame(False)
         self.startdate.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.startdate.setDate(QDate(1900, 1, 1))
 
         self.verticalLayout_2.addWidget(self.startdate)
 
@@ -114,6 +117,7 @@ class Ui_Dialog(object):
         self.enddate.setWrapping(True)
         self.enddate.setFrame(False)
         self.enddate.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.enddate.setDate(QDate(2099, 1, 1))
 
         self.verticalLayout_3.addWidget(self.enddate)
 
@@ -165,6 +169,7 @@ class Ui_Dialog(object):
         self.filemaxsize = QSpinBox(self.frame_2)
         self.filemaxsize.setObjectName(u"filemaxsize")
         self.filemaxsize.setMaximum(999999999)
+        self.filemaxsize.setValue(999999999)
 
         self.verticalLayout.addWidget(self.filemaxsize)
 
@@ -185,10 +190,21 @@ class Ui_Dialog(object):
 
         self.verticalLayout_8.addWidget(self.label_5)
 
+        self.horizontalLayout_9 = QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
         self.phraseinput = QLineEdit(self.frame)
         self.phraseinput.setObjectName(u"phraseinput")
 
-        self.verticalLayout_8.addWidget(self.phraseinput)
+        self.horizontalLayout_9.addWidget(self.phraseinput)
+
+        self.serchphrasebtn = QPushButton(self.frame)
+        self.serchphrasebtn.setObjectName(u"serchphrasebtn")
+
+        self.horizontalLayout_9.addWidget(self.serchphrasebtn)
+
+        self.horizontalLayout_9.setStretch(0, 9)
+
+        self.verticalLayout_8.addLayout(self.horizontalLayout_9)
 
 
         self.gridLayout.addLayout(self.verticalLayout_8, 3, 0, 1, 1)
@@ -226,10 +242,10 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_3.addWidget(self.filematchwholeword)
 
-        self.checkBox_3 = QCheckBox(self.frame)
-        self.checkBox_3.setObjectName(u"checkBox_3")
+        self.filematchdiacribcs = QCheckBox(self.frame)
+        self.filematchdiacribcs.setObjectName(u"filematchdiacribcs")
 
-        self.horizontalLayout_3.addWidget(self.checkBox_3)
+        self.horizontalLayout_3.addWidget(self.filematchdiacribcs)
 
 
         self.verticalLayout_6.addLayout(self.horizontalLayout_3)
@@ -260,7 +276,7 @@ class Ui_Dialog(object):
 
         self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
 
-        self.fileextationinput = QLineEdit(self.frame)
+        self.fileextationinput = QComboBox(self.frame)
         self.fileextationinput.setObjectName(u"fileextationinput")
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.fileextationinput)
@@ -324,11 +340,23 @@ class Ui_Dialog(object):
 
         self.gridLayout_3.addLayout(self.verticalLayout_5, 0, 0, 1, 1)
 
-        self.label_10 = QLabel(Dialog)
-        self.label_10.setObjectName(u"label_10")
-
-        self.gridLayout_3.addWidget(self.label_10, 0, 1, 1, 1)
-
+        QWidget.setTabOrder(self.filenameinput, self.lineEdit_3)
+        QWidget.setTabOrder(self.lineEdit_3, self.filemachcase)
+        QWidget.setTabOrder(self.filemachcase, self.filematchwholeword)
+        QWidget.setTabOrder(self.filematchwholeword, self.filematchdiacribcs)
+        QWidget.setTabOrder(self.filematchdiacribcs, self.excludewords)
+        QWidget.setTabOrder(self.excludewords, self.fileexactphrasematchcase)
+        QWidget.setTabOrder(self.fileexactphrasematchcase, self.fileexactmactchwholeword)
+        QWidget.setTabOrder(self.fileexactmactchwholeword, self.fileexactmatchdiacribcs)
+        QWidget.setTabOrder(self.fileexactmatchdiacribcs, self.lineEdit_6)
+        QWidget.setTabOrder(self.lineEdit_6, self.includesubfolder)
+        QWidget.setTabOrder(self.includesubfolder, self.digadvborwesfile)
+        QWidget.setTabOrder(self.digadvborwesfile, self.startdate)
+        QWidget.setTabOrder(self.startdate, self.enddate)
+        QWidget.setTabOrder(self.enddate, self.fileminsize)
+        QWidget.setTabOrder(self.fileminsize, self.filemaxsize)
+        QWidget.setTabOrder(self.filemaxsize, self.digadvsearchbtn)
+        QWidget.setTabOrder(self.digadvsearchbtn, self.digadvcancelbtn)
 
         self.retranslateUi(Dialog)
 
@@ -337,10 +365,10 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
-        self.label_4.setText(QCoreApplication.translate("Dialog", u"This Exact Phrase:", None))
+        self.label_4.setText(QCoreApplication.translate("Dialog", u"None of These Words:", None))
         self.fileexactphrasematchcase.setText(QCoreApplication.translate("Dialog", u"Match case", None))
         self.fileexactmactchwholeword.setText(QCoreApplication.translate("Dialog", u"Match whole words", None))
-        self.checkBox_6.setText(QCoreApplication.translate("Dialog", u"Match diacribcs", None))
+        self.fileexactmatchdiacribcs.setText(QCoreApplication.translate("Dialog", u"Match diacribcs", None))
         self.label_6.setText(QCoreApplication.translate("Dialog", u"From", None))
         self.startdate.setDisplayFormat(QCoreApplication.translate("Dialog", u"yyyy/M/d", None))
         self.label_7.setText(QCoreApplication.translate("Dialog", u"To", None))
@@ -349,10 +377,11 @@ class Ui_Dialog(object):
         self.label_9.setText(QCoreApplication.translate("Dialog", u"To", None))
         self.label_8.setText(QCoreApplication.translate("Dialog", u"From", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"A word or phrase in the file:", None))
+        self.serchphrasebtn.setText("")
         self.label_3.setText(QCoreApplication.translate("Dialog", u"All This Words", None))
         self.filemachcase.setText(QCoreApplication.translate("Dialog", u"Match case", None))
         self.filematchwholeword.setText(QCoreApplication.translate("Dialog", u"Match whole words", None))
-        self.checkBox_3.setText(QCoreApplication.translate("Dialog", u"Match diacribcs", None))
+        self.filematchdiacribcs.setText(QCoreApplication.translate("Dialog", u"Match diacribcs", None))
         self.modification.setText(QCoreApplication.translate("Dialog", u"Modification Date Between ", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"File Name", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"File Extension", None))
@@ -361,6 +390,5 @@ class Ui_Dialog(object):
         self.includesubfolder.setText(QCoreApplication.translate("Dialog", u"Include Sub Folder", None))
         self.digadvsearchbtn.setText("")
         self.digadvcancelbtn.setText("")
-        self.label_10.setText(QCoreApplication.translate("Dialog", u"-", None))
     # retranslateUi
 

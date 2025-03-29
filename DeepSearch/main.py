@@ -1,16 +1,21 @@
 from PySide6 import QtWidgets
+from PySide6 import QtCore
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import *
 import sys
+import os
 import mysql.connector
 from qt_material import apply_stylesheet
 import qtawesome as qta
+from dotenv import load_dotenv
 from Modules.Search.simplesearch import search_files_db
 from Mainwindow.MainWindow import Ui_MainWindow
 import loaddialogs
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "1900340220"
-DB_NAME = "file_monitor"
+load_dotenv()
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME")
 EXTENSION_GROUPS = {
     "Audio": {".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".alac"},
     "Document": {".doc", ".docx", ".pdf", ".txt", ".xlsx", ".xls", ".ppt", ".pptx", ".odt", ".rtf"},
@@ -82,6 +87,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.w = None
         self.w1 = None
         self.setupUi(self)
+        self.setWindowTitle("Deep Search")
         self.data = fetch_all_files()  # Fetch data from MySQL
         self.tableWidget.setRowCount(len(self.data))  # Set row count
         self.tablestyle()
@@ -151,9 +157,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def showadvsearchdig(self, checked):
         """Show advanced search dialog."""
         if self.w is None:
-            self.w = loaddialogs.LoadAdvSearch()
-        self.w.show()
+            self.w = loaddialogs.LoadAdvSearch(self)  # Pass main window reference
+            self.w.setAttribute(QtCore.Qt.WA_DeleteOnClose)  # Ensures proper cleanup
+            self.w.show()
+            self.w.destroyed.connect(self.clear_dialog_reference)  # Reset reference when closed
+        else:
+            self.w.raise_()  # Bring the window to the front
+            self.w.activateWindow()  # Focus the window
 
+    def clear_dialog_reference(self):
+        """Clear dialog reference when it is closed."""
+        self.w = None
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     apply_stylesheet(app, theme='dark_purple.xml')

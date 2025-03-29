@@ -1,114 +1,143 @@
-import json
+import mysql.connector
 import os
+import logging
 from datetime import datetime
-import unicodedata
 
-def load_index(file_path):
-    """Load file index from a JSON file."""
+# Configure logging
+logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
+
+# Database credentials
+DB_HOST = "localhost"
+DB_USER = os.getenv("DB_USER", "root")  
+DB_PASSWORD = os.getenv("DB_PASSWORD", "1900340220")  # Replace with a secure method
+DB_NAME = "file_monitor"
+
+def validate_date(date_str):
+    """Validates and converts a date string to a date object."""
+    if not date_str:
+        return None
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print("Error: file_index.json not found.")
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        print(f"Invalid date format: {date_str}. Expected YYYY-MM-DD.")
+        return None
+
+def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None, 
+               min_size=None, max_size=None, match_case=False, match_whole_word=False, 
+               match_diacritics=False, exclude_words=None, 
+               match_case_exclude=False, match_whole_word_exclude=False, match_diacritics_exclude=False):
+    try:
+        # Establish the connection
+        conn = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
+        )
+        cursor = conn.cursor()
+
+        # Base query and values list
+        conditions = ["1=1"]  
+        values = []
+
+        # Handle name pattern matching
+        if name_pattern:
+            collation = "BINARY" if match_case or match_diacritics else "utf8mb4_general_ci"
+            if match_whole_word:
+                conditions.append(f"name = %s COLLATE {collation}")
+                values.append(name_pattern)
+            else:
+                conditions.append(f"name LIKE %s COLLATE {collation}")
+                values.append(f"%{name_pattern}%")
+
+        # Filter by file type
+        if file_type:
+            conditions.append("type = %s")
+            values.append(file_type)
+
+        # Filter by modification date
+        if start_date and end_date:
+            conditions.append("modification_time BETWEEN %s AND %s")
+            values.extend([start_date, end_date])
+        elif start_date:
+            conditions.append("modification_time >= %s")
+            values.append(start_date)
+        elif end_date:
+            conditions.append("modification_time <= %s")
+            values.append(end_date)
+
+        # Filter by file size
+        if min_size and max_size:
+            conditions.append("size BETWEEN %s AND %s")
+            values.extend([min_size, max_size])
+        elif min_size:
+            conditions.append("size >= %s")
+            values.append(min_size)
+        elif max_size:
+            conditions.append("size <= %s")
+            values.append(max_size)
+
+        # Exclude words from filename
+        if exclude_words:
+            for word in exclude_words:
+                collation_exclude = "BINARY" if match_case_exclude or match_diacritics_exclude else "utf8mb4_general_ci"
+                if match_whole_word_exclude:
+                    conditions.append(f"name != %s COLLATE {collation_exclude}")
+                    values.append(word)
+                else:
+                    conditions.append(f"name NOT LIKE %s COLLATE {collation_exclude}")
+                    values.append(f"%{word}%")
+
+        # Construct the final SQL query
+        query = "SELECT id, name, path, type, modification_time, size FROM files WHERE " + " AND ".join(conditions)
+
+        # Execute query
+        cursor.execute(query, values)
+        results = [list(row) for row in cursor.fetchall()]  # Convert tuples to lists
+
+        # Close resources
+        cursor.close()
+        conn.close()
+
+        return results  
+
+    except mysql.connector.Error as e:
+        logging.error("Database error occurred", exc_info=True)
         return []
 
-def normalize_string(s):
-    """Normalize string to remove diacritics."""
-    return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
-
-def search_files(index, name=None, file_type=None, mod_date=None, size=None, date_range=None, size_range=None, match_case=False, match_whole_word=False, match_diacritics=False):
-    """Search for files based on given criteria."""
-    print("search_files called")
-    results = []
-    for entry in index:
-        file_name = entry["Name"]
-        if not match_case:
-            file_name = file_name.lower()
-            if name:
-                name = name.lower()
-        if not match_diacritics and name:
-            file_name = normalize_string(file_name)
-            name = normalize_string(name)
-        if name:
-            if match_whole_word:
-                if file_name != name:
-                    continue
-            else:
-                if name not in file_name:
-                    continue
-        if file_type and not entry["Name"].lower().endswith(file_type.lower()):
-            continue
-        if mod_date:
-            entry_mod_time = datetime.strptime(entry["Modification Time"], "%a %b %d %H:%M:%S %Y")
-            if mod_date != entry_mod_time.strftime("%Y-%m-%d"):
-                continue
-        if date_range:
-            start_date, end_date = date_range
-            entry_mod_time = datetime.strptime(entry["Modification Time"], "%a %b %d %H:%M:%S %Y")
-            if not (start_date <= entry_mod_time.date() <= end_date):
-                continue
-        if size and entry["Size (bytes)"] != "N/A":
-            try:
-                if int(entry["Size (bytes)"]) != size:
-                    continue
-            except ValueError:
-                pass
-        if size_range and entry["Size (bytes)"] != "N/A":
-            try:
-                file_size = int(entry["Size (bytes)"])
-                if not (size_range[0] <= file_size <= size_range[1]):
-                    continue
-            except ValueError:
-                pass
-        results.append(entry)
-    return results
-
-def main():
-    file_index = load_index(r"DeepSearch\Modules\Indexrecord\file_index.json")
-    if not file_index:
-        return
-    
-    print("Search files by name, type, modification date (YYYY-MM-DD), date range (YYYY-MM-DD to YYYY-MM-DD), size, or size range.")
-    name = input("Enter file name (or part of it, leave blank to skip): ")
-    file_type = input("Enter file extension (e.g., .txt, .pdf, leave blank to skip): ")
-    mod_date = input("Enter modification date (YYYY-MM-DD, leave blank to skip): ")
-    date_range_input = input("Enter date range (YYYY-MM-DD to YYYY-MM-DD, leave blank to skip): ")
-    size = input("Enter file size in bytes (leave blank to skip): ")
-    size_range_input = input("Enter size range (min-max bytes, leave blank to skip): ")
-    match_case = input("Match case? (yes/no): ").strip().lower() == "yes"
-    match_whole_word = input("Match whole word? (yes/no): ").strip().lower() == "yes"
-    match_diacritics = input("Match diacritics? (yes/no): ").strip().lower() == "yes"
-    
-    size = int(size) if size.isdigit() else None
-    date_range = None
-    size_range = None
-    
-    if date_range_input:
-        try:
-            start_str, end_str = date_range_input.split(" to ")
-            start_date = datetime.strptime(start_str, "%Y-%m-%d").date()
-            end_date = datetime.strptime(end_str, "%Y-%m-%d").date()
-            date_range = (start_date, end_date)
-        except ValueError:
-            print("Invalid date range format.")
-            return
-    
-    if size_range_input:
-        try:
-            min_size, max_size = map(int, size_range_input.split("-"))
-            size_range = (min_size, max_size)
-        except ValueError:
-            print("Invalid size range format.")
-            return
-    
-    results = search_files(file_index, name, file_type, mod_date, size, date_range, size_range, match_case, match_whole_word, match_diacritics)
-    
-    if results:
-        print("\nSearch Results:")
-        for res in results:
-            print(json.dumps(res, indent=4))
-    else:
-        print("No matching files found.")
-
+# User input with defaults
 if __name__ == "__main__":
-    main()
+    name_pattern = input("Enter name pattern (leave blank to ignore): ") or None
+    file_type = input("Enter file type (leave blank to ignore): ") or None
+    start_date = validate_date(input("Enter start date (YYYY-MM-DD, leave blank to ignore): "))
+    end_date = validate_date(input("Enter end date (YYYY-MM-DD, leave blank to ignore): "))
+    
+    min_size = input("Enter minimum file size (bytes, leave blank to ignore): ")
+    max_size = input("Enter maximum file size (bytes, leave blank to ignore): ")
+
+    # Convert size inputs to integers if provided
+    min_size = int(min_size) if min_size else None
+    max_size = int(max_size) if max_size else None
+
+    # Filename match options
+    match_case = input("Match case for filename? (yes/no): ").strip().lower() == 'yes'
+    match_whole_word = input("Match whole word for filename? (yes/no): ").strip().lower() == 'yes'
+    match_diacritics = input("Match diacritics for filename? (yes/no): ").strip().lower() == 'yes'
+
+    # Exclude words input
+    exclude_words_input = input("Enter words to exclude (comma-separated, leave blank to ignore): ")
+    exclude_words = [word.strip() for word in exclude_words_input.split(',')] if exclude_words_input else None
+
+    # Exclude words match options
+    match_case_exclude = input("Match case for excluding words? (yes/no): ").strip().lower() == 'yes'
+    match_whole_word_exclude = input("Match whole word for excluding words? (yes/no): ").strip().lower() == 'yes'
+    match_diacritics_exclude = input("Match diacritics for excluding words? (yes/no): ").strip().lower() == 'yes'
+
+    # Fetch and display results
+    results = fetch_data(name_pattern, file_type, start_date, end_date, min_size, max_size, 
+                         match_case, match_whole_word, match_diacritics, 
+                         exclude_words, match_case_exclude, match_whole_word_exclude, match_diacritics_exclude)
+
+    # Output results as list of lists
+    print("\nResults (List of Lists):")
+    print(results)

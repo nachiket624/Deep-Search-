@@ -16,16 +16,19 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QDialog, QGridLayout,
-    QHeaderView, QSizePolicy, QTableWidget, QTableWidgetItem,
-    QWidget)
+    QHeaderView, QLayout, QSizePolicy, QTableWidget,
+    QTableWidgetItem, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         Dialog.resize(1186, 771)
+        Dialog.setSizeGripEnabled(True)
+        Dialog.setModal(True)
         self.gridLayout = QGridLayout(Dialog)
         self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setSizeConstraint(QLayout.SetMaximumSize)
         self.tableWidget = QTableWidget(Dialog)
         if (self.tableWidget.columnCount() < 5):
             self.tableWidget.setColumnCount(5)

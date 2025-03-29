@@ -5,8 +5,9 @@ build/
 dist/
 wheels/
 *.egg-info
-.*.spec
-
+*.spec
+.env
+test.py
 # Virtual environments
 .venv
 indexrecord/

@@ -2,7 +2,7 @@ from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
 
 def search_files(query_str):
-    index_dir = r"../textindex"  # Ensure this matches your indexing script
+    index_dir = r"../textindex" 
     results_list = []
 
     try:
@@ -25,9 +25,3 @@ def search_files(query_str):
     return results_list # Return results as a list
 
 
-
-# Main execution
-# if __name__ == "__main__":
-#     index_directory = r"./textindex"  # Ensure this matches your indexing script
-#     search_query = "Eothen is the earliest work of Alexander William Kinglake"
-#     search_files(index_directory, search_query)
