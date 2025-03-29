@@ -41,7 +41,7 @@ Ensure you have the following installed on your system:
 
 For Windows users, you can download the precompiled executable:
 
-1. Visit the [Releases](https://github.com/yourusername/deep-search/releases) page.
+1. Visit the [Releases](https://github.com/nachiket624/deep-search/releases) page.
 2. Download the latest `deep-search.exe` file.
 3. Run the `.exe` file to start using Deep Search without installing dependencies.
 
