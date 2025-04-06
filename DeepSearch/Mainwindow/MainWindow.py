@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'MainWindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -16,16 +16,17 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QHBoxLayout,
-    QHeaderView, QLineEdit, QMainWindow, QMenu,
-    QMenuBar, QPushButton, QSizePolicy, QStatusBar,
-    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QGridLayout,
+    QHBoxLayout, QHeaderView, QLineEdit, QMainWindow,
+    QMenu, QMenuBar, QPushButton, QSizePolicy,
+    QStackedWidget, QStatusBar, QTableWidget, QTableWidgetItem,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1038, 503)
+        MainWindow.resize(1034, 494)
         MainWindow.setAnimated(False)
         self.actionView = QAction(MainWindow)
         self.actionView.setObjectName(u"actionView")
@@ -67,10 +68,22 @@ class Ui_MainWindow(object):
         self.actionExecutable = QAction(MainWindow)
         self.actionExecutable.setObjectName(u"actionExecutable")
         self.actionExecutable.setCheckable(True)
+        self.actionSettings = QAction(MainWindow)
+        self.actionSettings.setObjectName(u"actionSettings")
+        self.actionTheam = QAction(MainWindow)
+        self.actionTheam.setObjectName(u"actionTheam")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.horizontalLayout_3 = QHBoxLayout(self.centralwidget)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.stackedWidget = QStackedWidget(self.centralwidget)
+        self.stackedWidget.setObjectName(u"stackedWidget")
+        self.Mainpage = QWidget()
+        self.Mainpage.setObjectName(u"Mainpage")
+        self.gridLayout = QGridLayout(self.Mainpage)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setHorizontalSpacing(0)
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -78,12 +91,12 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.lineeditsearch = QLineEdit(self.centralwidget)
+        self.lineeditsearch = QLineEdit(self.Mainpage)
         self.lineeditsearch.setObjectName(u"lineeditsearch")
 
         self.horizontalLayout_2.addWidget(self.lineeditsearch)
 
-        self.advsearchbtn = QPushButton(self.centralwidget)
+        self.advsearchbtn = QPushButton(self.Mainpage)
         self.advsearchbtn.setObjectName(u"advsearchbtn")
 
         self.horizontalLayout_2.addWidget(self.advsearchbtn)
@@ -97,7 +110,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.tableWidget = QTableWidget(self.centralwidget)
+        self.tableWidget = QTableWidget(self.Mainpage)
         if (self.tableWidget.columnCount() < 5):
             self.tableWidget.setColumnCount(5)
         __qtablewidgetitem = QTableWidgetItem()
@@ -144,12 +157,19 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
 
 
-        self.horizontalLayout_3.addLayout(self.verticalLayout)
+        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+
+        self.stackedWidget.addWidget(self.Mainpage)
+        self.Settings = QWidget()
+        self.Settings.setObjectName(u"Settings")
+        self.stackedWidget.addWidget(self.Settings)
+
+        self.horizontalLayout_3.addWidget(self.stackedWidget)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1038, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1034, 22))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuEdit = QMenu(self.menubar)
@@ -167,6 +187,8 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuEdit_2.menuAction())
         self.menubar.addAction(self.menuSearch.menuAction())
+        self.menuFile.addAction(self.actionSettings)
+        self.menuFile.addAction(self.actionTheam)
         self.menuSearch.addAction(self.actionMatch_Case)
         self.menuSearch.addAction(self.actionMatch_Whole_Word)
         self.menuSearch.addAction(self.actionMatch_Path)
@@ -179,8 +201,8 @@ class Ui_MainWindow(object):
         self.menuSearch.addAction(self.actionPicture)
         self.menuSearch.addAction(self.actionVideo)
         self.menuSearch.addAction(self.actionFolder)
-        self.menuSearch.addAction(self.actionCompressed)
         self.menuSearch.addAction(self.actionExecutable)
+        self.menuSearch.addAction(self.actionCompressed)
 
         self.retranslateUi(MainWindow)
 
@@ -202,6 +224,8 @@ class Ui_MainWindow(object):
         self.actionFolder.setText(QCoreApplication.translate("MainWindow", u"Folder", None))
         self.actionCompressed.setText(QCoreApplication.translate("MainWindow", u"Compressed", None))
         self.actionExecutable.setText(QCoreApplication.translate("MainWindow", u"Executable", None))
+        self.actionSettings.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
+        self.actionTheam.setText(QCoreApplication.translate("MainWindow", u"Theam", None))
         self.advsearchbtn.setText("")
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Name", None));

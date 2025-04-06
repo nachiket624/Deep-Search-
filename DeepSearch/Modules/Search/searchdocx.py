@@ -1,20 +1,29 @@
-import os
 from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
 
-def search_docx_index(index_dir, search_query):
-    """Searches the index for the given query."""
-    if not os.path.exists(index_dir):
-        print("Index directory does not exist.")
-        return
+def search_files(query_str):
+    index_dir = r"../docx_index" 
+    results_list = []
 
-    index = open_dir(index_dir)
-    with index.searcher() as searcher:
-        query = QueryParser("content", index.schema).parse(search_query)
-        results = searcher.search(query)
-        print(f"Found {len(results)} result(s):")
+    try:
+        ix = open_dir(index_dir)
+        searcher = ix.searcher()
+        query = QueryParser("content_preview", ix.schema).parse(query_str)
+        results = searcher.search(query, limit=10)
+        
         for result in results:
-            print(f"File: {result['filepath']}")
+            results_list.append([
+                result["filename"],
+                result["filepath"],
+                result["content_preview"]
+            ])
+        
+        searcher.close()
+    
+    except Exception as e:
+        print(f"Error during search: {e}")
+    return results_list # Return results as a list
+
 
 # Main execution
 if __name__ == "__main__":
@@ -23,5 +32,5 @@ if __name__ == "__main__":
 
     # Perform a search
     search_query = "publisher: Hachette Digital, Inc."  # Replace with your search query
-    search_docx_index(index_directory, search_query)
+    search_files(search_query)
 

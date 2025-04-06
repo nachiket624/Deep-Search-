@@ -17,3 +17,5 @@ DesingFiles/
 files.db
 .idea/
 textindex/
+docx_index
+pdf_index

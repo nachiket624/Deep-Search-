@@ -3,14 +3,14 @@ from PySide6 import QtCore
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import *
 import sys
-import os
-import mysql.connector
 from qt_material import apply_stylesheet
 import qtawesome as qta
-from dotenv import load_dotenv
 from Modules.Search.simplesearch import search_files_db
 from Mainwindow.MainWindow import Ui_MainWindow
 import loaddialogs
+import mysql.connector
+import os
+from dotenv import load_dotenv
 load_dotenv()
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")

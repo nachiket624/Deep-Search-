@@ -23,5 +23,3 @@ def search_files(query_str):
     except Exception as e:
         print(f"Error during search: {e}")
     return results_list # Return results as a list
-
-

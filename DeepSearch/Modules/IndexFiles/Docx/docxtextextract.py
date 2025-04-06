@@ -1,1 +1,0 @@
-"""File to extract text from docx"""

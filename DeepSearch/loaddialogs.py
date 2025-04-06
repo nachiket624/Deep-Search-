@@ -5,10 +5,11 @@ from PySide6.QtWidgets import QTableWidgetItem
 import qtawesome as qta
 from dotenv import load_dotenv
 import os
-from Modules.Search.searchtxt import search_files
+from Modules.Search import searchtxt
+from Modules.Search import searchdocx
+from Modules.Search import searchpdf
 from Modules.Search import advancesearch 
-from PySide6.QtCore import Signal
-from main import MainWindow
+
 
 load_dotenv()
 DB_HOST = os.getenv("DB_HOST")
@@ -29,7 +30,10 @@ class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
         self.display_search_phrase(phrase)
 
     def display_search_phrase(self, phrase):
-        data = search_files(phrase)
+        docdata = searchdocx.search_files(phrase)
+        pdfdata = searchpdf.search_files(phrase)
+        txtdata = searchtxt.search_files(phrase)
+        data = docdata + pdfdata + txtdata
         self.tableWidget.setRowCount(len(data)+1) 
         self.tableWidget.setColumnCount(3)  
         self.tableWidget.setHorizontalHeaderLabels(["Title", "Path", "Content Preview"])
@@ -86,8 +90,8 @@ class LoadAdvSearch(QtWidgets.QDialog, advsearch.Ui_Dialog):
         self.digadvcancelbtn.setIcon(cancel_icon)
         self.phraseinput.textEdited.connect(self.checkserchcondition)
         if self.filenameinput.textChanged:
-            self.phraseinput.setDisabled(True)
-            self.serchphrasebtn.setDisabled(True)
+            self.phraseinput.setDisabled(False)
+            self.serchphrasebtn.setDisabled(False)
         self.digadvcancelbtn.clicked.connect(self.closeadvsearch)  
         self.digadvsearchbtn.clicked.connect(self.filesearch)
         self.fileextationinput.addItems(EXTENSION_GROUPS)
@@ -116,14 +120,11 @@ class LoadAdvSearch(QtWidgets.QDialog, advsearch.Ui_Dialog):
     
     def checkserchcondition(self):
         self.digadvsearchbtn.setDisabled(True)
-        if len(self.phraseinput.text)<=0:
+        if len(self.phraseinput.text())<=0:
             self.digadvsearchbtn.setDisabled(False)
-      
-    
     def closeadvsearch(self):
         self.close()
-      
-        
+              
     def TextSearch(self):
         phrase_input = self.phraseinput.text().strip()
         
