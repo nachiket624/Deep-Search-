@@ -19,3 +19,5 @@ files.db
 textindex/
 docx_index
 pdf_index
+*.log
+

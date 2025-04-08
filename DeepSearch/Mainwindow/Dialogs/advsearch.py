@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'advsearch.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.5.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -59,7 +59,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_7 = QHBoxLayout()
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_7.addItem(self.horizontalSpacer_3)
 
@@ -98,6 +98,7 @@ class Ui_Dialog(object):
         self.startdate.setWrapping(True)
         self.startdate.setFrame(False)
         self.startdate.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.startdate.setCalendarPopup(True)
         self.startdate.setDate(QDate(1900, 1, 1))
 
         self.verticalLayout_2.addWidget(self.startdate)
@@ -117,6 +118,7 @@ class Ui_Dialog(object):
         self.enddate.setWrapping(True)
         self.enddate.setFrame(False)
         self.enddate.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.enddate.setCalendarPopup(True)
         self.enddate.setDate(QDate(2099, 1, 1))
 
         self.verticalLayout_3.addWidget(self.enddate)
@@ -228,7 +230,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
 
@@ -320,7 +322,7 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_5.addItem(self.horizontalSpacer)
 
