@@ -4,9 +4,7 @@ import mysql.connector
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser
-from dotenv import load_dotenv
-
-from db.db_utils import get_db_connection
+from dbconnection.db_utils import get_db_connection
 
 
 # Define Whoosh schema
@@ -17,18 +15,14 @@ schema = Schema(
 )
 
 def index_txt_files_from_mysql():
-    index_dir = r"DeepSearch\indexfiles\textindex"
+    index_dir = r"..\indexfiles\textindex"
 
-    # Recreate index directory
     if os.path.exists(index_dir):
         shutil.rmtree(index_dir)
     os.mkdir(index_dir)
-
-    # Create Whoosh index
     ix = create_in(index_dir, schema)
     writer = ix.writer()
 
-    # Exclude common system directories
     excluded_dirs = [
         os.environ.get("ProgramFiles", r"C:\Program Files"),
         os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
@@ -96,12 +90,9 @@ def get_indexed_txt_file_paths_from_db():
     txt_paths = []
 
     try:
-        conn = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
+        conn = get_db_connection(use_database=True)
+        if conn is None:
+            return
         cursor = conn.cursor()
         cursor.execute("SELECT path FROM files WHERE type = '.txt'")
 

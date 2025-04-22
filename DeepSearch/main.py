@@ -9,9 +9,7 @@ import qtawesome as qta
 from search.simplesearch import search_files_db
 from app.MainWindow import Ui_MainWindow
 import app.loaddialogs as loaddialogs
-import mysql.connector
-import os
-from db.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection
+from dbconnection.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection
 
 EXTENSION_GROUPS = ALLOWED_EXTENSIONS
 
