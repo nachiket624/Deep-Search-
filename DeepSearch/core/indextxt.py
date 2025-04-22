@@ -65,26 +65,7 @@ def index_txt_files_from_mysql():
     except mysql.connector.Error as db_error:
         print(f"MySQL error: {db_error}")
 
-def search_files(query_str):
-    index_dir = "textindex"
-    results_list = []
 
-    try:
-        ix = open_dir(index_dir)
-        with ix.searcher() as searcher:
-            query = QueryParser("content_preview", ix.schema).parse(query_str)
-            results = searcher.search(query, limit=10)
-
-            for result in results:
-                results_list.append([
-                    result["filename"],
-                    result["filepath"],
-                    result["content_preview"]
-                ])
-    except Exception as e:
-        print(f"Error during search: {e}")
-
-    return results_list
 
 def get_indexed_txt_file_paths_from_db():
     txt_paths = []
@@ -136,21 +117,3 @@ def compare_index_and_db():
     for path in orphan_in_index:
         print(f"  - {path}")
 
-if __name__ == "__main__":
-    # Step 1: Index files
-    index_txt_files_from_mysql()
-
-    # Step 2: Perform a test search
-    print("\n🔎 Search Results for 'example':")
-    results = search_files("example")
-    for filename, filepath, preview in results:
-        print(f"\n📄 {filename} ({filepath})\n{preview[:200]}...\n")
-
-    # Step 3: Show all .txt paths from DB
-    print("\n📁 Indexed Paths from DB:")
-    for path in get_indexed_txt_file_paths_from_db():
-        print(f" - {path}")
-
-    # Step 4: Compare DB and Whoosh Index
-    print("\n🔍 Compare DB and Index:")
-    compare_index_and_db()
