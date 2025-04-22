@@ -1,12 +1,14 @@
 import mysql.connector
+from mysql.connector import errorcode
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
+DB_NAME = "dbdeepsearch"
 
 ALLOWED_EXTENSIONS = {
     ".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".alac",
@@ -17,18 +19,33 @@ ALLOWED_EXTENSIONS = {
     ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso"
 }
 
-DB_CONFIG = {
-    "host": DB_HOST,
-    "user": DB_USER,
-    "password": DB_PASSWORD,
-    "database":DB_NAME
-}
+def get_db_connection(use_database=True):
+    try:
+        config = {
+            "host": DB_HOST,
+            "user": DB_USER,
+            "password": DB_PASSWORD,
+        }
+        if use_database:
+            config["database"] = DB_NAME
+        return mysql.connector.connect(**config)
+    except mysql.connector.Error as err:
+        print(f"DB Connection Error: {err}")
+        return None
 
-def get_db_connection():
-    return mysql.connector.connect(**DB_CONFIG)
+def create_database_if_not_exists():
+    conn = get_db_connection(use_database=False)
+    if conn is None:
+        return
+    cursor = conn.cursor()
+    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
+    conn.commit()
+    conn.close()
 
-def create_database():
+def create_table():
     conn = get_db_connection()
+    if conn is None:
+        return
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS files (
                         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -36,9 +53,13 @@ def create_database():
                         path VARCHAR(512) UNIQUE,
                         type VARCHAR(50),
                         modification_time DATETIME,
-                        size BIGINT)''')
+                        size BIGINT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                     )''')
     conn.commit()
     conn.close()
 
 def formatdate(filedatetime):
     return datetime.fromtimestamp(filedatetime).strftime('%Y-%m-%d %H:%M:%S')
+

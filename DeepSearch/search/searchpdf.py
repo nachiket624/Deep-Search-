@@ -2,7 +2,7 @@ from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
 
 def search_files(query_str):
-    index_dir = r"../docx_index" 
+    index_dir = r"./indexfiles/pdf_index" 
     results_list = []
 
     try:
@@ -23,14 +23,3 @@ def search_files(query_str):
     except Exception as e:
         print(f"Error during search: {e}")
     return results_list # Return results as a list
-
-
-# Main execution
-if __name__ == "__main__":
-    # Define index directory
-    index_directory = "../../Indexrecord/docxindex"  # Directory where the index is stored
-
-    # Perform a search
-    search_query = "publisher: Hachette Digital, Inc."  # Replace with your search query
-    search_files(search_query)
-

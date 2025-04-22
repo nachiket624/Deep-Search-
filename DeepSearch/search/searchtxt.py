@@ -2,7 +2,7 @@ from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
 
 def search_files(query_str):
-    index_dir = r"../textindex" 
+    index_dir = r"./indexfiles/textindex/" 
     results_list = []
 
     try:
@@ -23,3 +23,4 @@ def search_files(query_str):
     except Exception as e:
         print(f"Error during search: {e}")
     return results_list # Return results as a list
+

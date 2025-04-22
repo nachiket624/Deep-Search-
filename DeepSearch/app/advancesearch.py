@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %
 DB_HOST = "localhost"
 DB_USER = os.getenv("DB_USER", "root")  
 DB_PASSWORD = os.getenv("DB_PASSWORD", "1900340220")  # Replace with a secure method
-DB_NAME = "file_monitor"
+DB_NAME = "dbdeepsearch"
 
 def validate_date(date_str):
     """Validates and converts a date string to a date object."""

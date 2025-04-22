@@ -4,10 +4,11 @@ import logging
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from db_utils import get_db_connection, create_database, formatdate, ALLOWED_EXTENSIONS
+from db.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection
+
 
 logging.basicConfig(
-    filename='app.log',
+    filename='deepsearchapp.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -66,7 +67,8 @@ def main():
     if not os.path.isdir(directory):
         logging.error(f"Invalid directory path entered: {directory}")
         return
-    create_database()
+    create_database_if_not_exists()
+    create_table()
     logging.info(f"Monitoring started on: {directory}")
     event_handler = FileEventHandler()
     observer = Observer()

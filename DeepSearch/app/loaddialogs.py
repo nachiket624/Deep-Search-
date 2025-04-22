@@ -1,15 +1,15 @@
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import *
-from Mainwindow.Dialogs import advsearch, textresult
+from app import advsearch, textresult
 from PySide6.QtWidgets import QTableWidgetItem
 import qtawesome as qta
+from PySide6.QtCore import Qt
 from dotenv import load_dotenv
 import os
-from Modules.Search import searchtxt
-from Modules.Search import searchdocx
-from Modules.Search import searchpdf
-from Modules.Search import advancesearch 
-
+from search import searchtxt,searchdocx,searchpdf
+from app import advancesearch 
+import subprocess
+import platform
 
 load_dotenv()
 DB_HOST = os.getenv("DB_HOST")
@@ -22,11 +22,19 @@ EXTENSION_GROUPS =["",".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", "
                     ".gif", ".bmp", ".tiff", ".svg", ".webp",".mp4", ".mkv", ".mov", ".avi", ".flv", ".wmv", ".webm", ".mpeg"
                     ".exe", ".bat", ".sh", ".app", ".msi",".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso"]
 
+
 class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
     def __init__(self, phrase=""):
         super().__init__()
         self.setupUi(self)
-        self.setWindowTitle("Text Matech")
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+        self.setWindowFlags(
+            Qt.Window |
+            Qt.WindowMinMaxButtonsHint |
+            Qt.WindowCloseButtonHint
+        )
+        self.setWindowTitle("Text Matech") 
+        self.tableWidget.cellClicked.connect(self.open_path_in_explorer)
         self.display_search_phrase(phrase)
 
     def display_search_phrase(self, phrase):
@@ -34,6 +42,7 @@ class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
         pdfdata = searchpdf.search_files(phrase)
         txtdata = searchtxt.search_files(phrase)
         data = docdata + pdfdata + txtdata
+        self.tableWidget.setWordWrap(True)
         self.tableWidget.setRowCount(len(data)+1) 
         self.tableWidget.setColumnCount(3)  
         self.tableWidget.setHorizontalHeaderLabels(["Title", "Path", "Content Preview"])
@@ -45,18 +54,46 @@ class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
         for row, item in enumerate(data):
             self.tableWidget.setItem(row, 0, QTableWidgetItem(str(item[0])))
             self.tableWidget.setItem(row, 1, QTableWidgetItem(item[1]))
-            self.tableWidget.setItem(row, 2, QTableWidgetItem(item[2]))
+
+            # ✅ Only column 2 (index 2) has word-wrapped text
+            preview_item = QTableWidgetItem(item[2])
+            preview_item.setTextAlignment(Qt.AlignLeft | Qt.AlignTop)
+            preview_item.setFlags(preview_item.flags() ^ Qt.ItemIsEditable)  # Optional: make read-only
+            self.tableWidget.setItem(row, 2, preview_item)
+        self.tableWidget.resizeRowsToContents()
+    def open_path_in_explorer(self, row, column):
+        if column == 1:  # Path column
+            item = self.tableWidget.item(row, column)
+            if item:
+                path = item.text()
+                if os.path.exists(path):
+                    if platform.system() == "Windows":
+                        os.startfile(path)
+                    elif platform.system() == "Darwin":  # macOS
+                        subprocess.Popen(["open", path])
+                    else:  # Linux
+                        subprocess.Popen(["xdg-open", path])
+                else:
+                    QtWidgets.QMessageBox.warning(self, "Path Not Found", f"The path does not exist:\n{path}")
 
 class LoadAdvSearchResult(QtWidgets.QDialog, textresult.Ui_Dialog):
     def __init__(self,data):
         super().__init__()
         self.setupUi(self)
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+        self.setWindowFlags(
+            Qt.Window |
+            Qt.WindowMinMaxButtonsHint |
+            Qt.WindowCloseButtonHint
+        )
         self.setWindowTitle("Advance File Search")
+        self.tableWidget.cellClicked.connect(self.open_path_in_explorer)
         self.tablestyle()
         self.update_table(data)
     def tablestyle(self):
         """Set table styles and column widths."""
         self.tableWidget.verticalHeader().setDefaultSectionSize(30)
+        self.tableWidget.setColumnCount(5)  
         table_header = ["Name", "Path", "Type", "Modification Time", "Size (bytes)"]
         self.tableWidget.setHorizontalHeaderLabels(table_header)
         column_widths = [300, 600, 100, 300, 140]
@@ -73,6 +110,21 @@ class LoadAdvSearchResult(QtWidgets.QDialog, textresult.Ui_Dialog):
             self.tableWidget.setItem(row, 2, QTableWidgetItem(entry[3]))  # Type
             self.tableWidget.setItem(row, 3, QTableWidgetItem(str(entry[4])))  # Modification Time
             self.tableWidget.setItem(row, 4, QTableWidgetItem(str(entry[5])))  # Size
+    def open_path_in_explorer(self, row, column):
+        if column == 1:  # Path column
+            item = self.tableWidget.item(row, column)
+            if item:
+                path = item.text()
+                if os.path.exists(path):
+                    if platform.system() == "Windows":
+                        os.startfile(path)
+                    elif platform.system() == "Darwin":  # macOS
+                        subprocess.Popen(["open", path])
+                    else:  # Linux
+                        subprocess.Popen(["xdg-open", path])
+                else:
+                    QtWidgets.QMessageBox.warning(self, "Path Not Found", f"The path does not exist:\n{path}")
+
 class LoadAdvSearch(QtWidgets.QDialog, advsearch.Ui_Dialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -116,7 +168,7 @@ class LoadAdvSearch(QtWidgets.QDialog, advsearch.Ui_Dialog):
             self.w = LoadAdvSearchResult(advdata) 
         else:
             self.w.update_table(advdata) 
-        self.w.show()
+        self.w.exec()
     
     def checkserchcondition(self):
         self.digadvsearchbtn.setDisabled(True)
@@ -136,4 +188,4 @@ class LoadAdvSearch(QtWidgets.QDialog, advsearch.Ui_Dialog):
             self.w = LoadTextResult(phrase_input) 
         else:
             self.w.display_search_phrase(phrase_input) 
-        self.w.show()
+        self.w.exec()

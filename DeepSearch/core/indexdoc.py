@@ -5,14 +5,7 @@ from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser
 from docx import Document
-from dotenv import load_dotenv
-
-# Load DB credentials from .env
-load_dotenv()
-DB_HOST = os.getenv("DB_HOST")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
+from db.db_utils import get_db_connection
 
 # Whoosh schema
 schema = Schema(
@@ -53,12 +46,9 @@ def index_docx_files_from_mysql():
     excluded_dirs = [os.path.normpath(p).lower() for p in excluded_dirs]
 
     try:
-        conn = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
+        conn = get_db_connection(use_database=False)
+        if conn is None:
+            return
         cursor = conn.cursor()
         cursor.execute("SELECT name, path FROM files WHERE type = '.docx'")
 

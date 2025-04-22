@@ -3,51 +3,28 @@ from PySide6 import QtCore
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import *
 import sys
-from qt_material import apply_stylesheet
+# from qt_material import apply_stylesheet
+import qdarktheme
 import qtawesome as qta
-from Modules.Search.simplesearch import search_files_db
-from Mainwindow.MainWindow import Ui_MainWindow
-import loaddialogs
+from search.simplesearch import search_files_db
+from app.MainWindow import Ui_MainWindow
+import app.loaddialogs as loaddialogs
 import mysql.connector
 import os
-from dotenv import load_dotenv
-load_dotenv()
-DB_HOST = os.getenv("DB_HOST")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
-EXTENSION_GROUPS = {
-    "Audio": {".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".alac"},
-    "Document": {".doc", ".docx", ".pdf", ".txt", ".xlsx", ".xls", ".ppt", ".pptx", ".odt", ".rtf"},
-    "Picture": {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"},
-    "Video": {".mp4", ".mkv", ".mov", ".avi", ".flv", ".wmv", ".webm", ".mpeg"},
-    "Executable": {".exe", ".bat", ".sh", ".app", ".msi"},
-    "Compressed": {".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso"},
-}
+from db.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection
 
-def connect_db():
-    """Establish a database connection."""
-    try:
-        conn = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        return conn
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        return None
+EXTENSION_GROUPS = ALLOWED_EXTENSIONS
 
 def fetch_all_files():
     """Fetch all file records from the MySQL database."""
-    conn = connect_db()
-    if conn:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT name, path, type, modification_time, size FROM files LIMIT 100")
-        data = cursor.fetchall()
-        conn.close()
-        return data
+    conn = get_db_connection(use_database=True)
+    if conn is None:
+        return
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT name, path, type, modification_time, size FROM files LIMIT 100")
+    data = cursor.fetchall()
+    conn.close()
+    return data
     return []
 
 def search_files_in_db(filename, filetypes=None):
@@ -170,7 +147,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.w = None
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    apply_stylesheet(app, theme='dark_purple.xml')
+    # apply_stylesheet(app, theme='dark_purple.xml')
+    qdarktheme.setup_theme()
     window = MainWindow()
+    create_database_if_not_exists()
+    create_table()
     window.show()
     app.exec()

@@ -5,14 +5,9 @@ from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser
 from dotenv import load_dotenv
-from PyPDF2 import PdfReader
 
-# Load environment variables
-load_dotenv()
-DB_HOST = os.getenv("DB_HOST")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
+from db.db_utils import get_db_connection
+
 
 # Define Whoosh schema
 schema = Schema(
@@ -21,19 +16,8 @@ schema = Schema(
     content_preview=TEXT(stored=True)
 )
 
-def extract_text_from_pdf(path):
-    try:
-        reader = PdfReader(path)
-        content = ""
-        for page in reader.pages:
-            content += page.extract_text() or ""
-        return content
-    except Exception as e:
-        print(f"⚠️ Could not read PDF {path}: {e}")
-        return ""
-
-def index_pdf_files_from_mysql():
-    index_dir = "pdf_index"
+def index_txt_files_from_mysql():
+    index_dir = r"DeepSearch\indexfiles\textindex"
 
     # Recreate index directory
     if os.path.exists(index_dir):
@@ -44,7 +28,7 @@ def index_pdf_files_from_mysql():
     ix = create_in(index_dir, schema)
     writer = ix.writer()
 
-    # System directories to exclude
+    # Exclude common system directories
     excluded_dirs = [
         os.environ.get("ProgramFiles", r"C:\Program Files"),
         os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
@@ -54,14 +38,11 @@ def index_pdf_files_from_mysql():
     excluded_dirs = [os.path.normpath(p).lower() for p in excluded_dirs]
 
     try:
-        conn = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
+        conn = get_db_connection(use_database=False)
+        if conn is None:
+            return
         cursor = conn.cursor()
-        cursor.execute("SELECT name, path FROM files WHERE type = '.pdf'")
+        cursor.execute("SELECT name, path FROM files WHERE type = '.txt'")
 
         for (name, path) in cursor.fetchall():
             try:
@@ -70,31 +51,28 @@ def index_pdf_files_from_mysql():
                     print(f"⛔ Skipping system file: {path}")
                     continue
 
-                content = extract_text_from_pdf(path)
-                if not content.strip():
-                    continue
-
-                preview = content[:1000]
-                writer.add_document(
-                    filename=name,
-                    filepath=path,
-                    content_preview=preview
-                )
-                print(f"✅ Indexed: {path}")
-
+                with open(path, 'r', encoding='utf-8', errors='ignore') as file:
+                    content = file.read()
+                    preview = content[:1000]
+                    writer.add_document(
+                        filename=name,
+                        filepath=path,
+                        content_preview=preview
+                    )
+                    print(f"✅ Indexed: {path}")
             except Exception as file_error:
                 print(f"❌ Could not read file {path}: {file_error}")
 
         cursor.close()
         conn.close()
         writer.commit()
-        print("✅ PDF indexing completed.")
+        print("✅ Indexing completed.")
 
     except mysql.connector.Error as db_error:
         print(f"MySQL error: {db_error}")
 
-def search_pdfs(query_str):
-    index_dir = "pdf_index"
+def search_files(query_str):
+    index_dir = "textindex"
     results_list = []
 
     try:
@@ -114,8 +92,8 @@ def search_pdfs(query_str):
 
     return results_list
 
-def get_pdf_file_paths_from_db():
-    pdf_paths = []
+def get_indexed_txt_file_paths_from_db():
+    txt_paths = []
 
     try:
         conn = mysql.connector.connect(
@@ -125,10 +103,10 @@ def get_pdf_file_paths_from_db():
             database=DB_NAME
         )
         cursor = conn.cursor()
-        cursor.execute("SELECT path FROM files WHERE type = '.pdf'")
+        cursor.execute("SELECT path FROM files WHERE type = '.txt'")
 
         for (path,) in cursor.fetchall():
-            pdf_paths.append(path)
+            txt_paths.append(path)
 
         cursor.close()
         conn.close()
@@ -136,9 +114,9 @@ def get_pdf_file_paths_from_db():
     except mysql.connector.Error as err:
         print(f"MySQL error: {err}")
 
-    return pdf_paths
+    return txt_paths
 
-def get_indexed_pdf_paths_from_whoosh(index_dir="pdf_index"):
+def get_indexed_file_paths_from_whoosh(index_dir="textindex"):
     indexed_paths = []
 
     try:
@@ -152,32 +130,36 @@ def get_indexed_pdf_paths_from_whoosh(index_dir="pdf_index"):
 
     return indexed_paths
 
-def compare_pdf_index_and_db():
-    mysql_paths = set(get_pdf_file_paths_from_db())
-    whoosh_paths = set(get_indexed_pdf_paths_from_whoosh())
+def compare_index_and_db():
+    mysql_paths = set(get_indexed_txt_file_paths_from_db())
+    whoosh_paths = set(get_indexed_file_paths_from_whoosh())
 
     missing_in_index = mysql_paths - whoosh_paths
     orphan_in_index = whoosh_paths - mysql_paths
 
-    print("🔍 PDF files in DB but not indexed:")
+    print("🔍 Files in DB but not indexed:")
     for path in missing_in_index:
         print(f"  - {path}")
 
-    print("\n🧹 PDF files indexed but not in DB:")
+    print("\n🧹 Files indexed but not in DB:")
     for path in orphan_in_index:
         print(f"  - {path}")
 
 if __name__ == "__main__":
-    index_pdf_files_from_mysql()
+    # Step 1: Index files
+    index_txt_files_from_mysql()
 
-    print("\n🔎 Search Results for 'invoice':")
-    results = search_pdfs("invoice")
+    # Step 2: Perform a test search
+    print("\n🔎 Search Results for 'example':")
+    results = search_files("example")
     for filename, filepath, preview in results:
         print(f"\n📄 {filename} ({filepath})\n{preview[:200]}...\n")
 
-    print("\n📁 Indexed PDF Paths from DB:")
-    for path in get_pdf_file_paths_from_db():
+    # Step 3: Show all .txt paths from DB
+    print("\n📁 Indexed Paths from DB:")
+    for path in get_indexed_txt_file_paths_from_db():
         print(f" - {path}")
 
+    # Step 4: Compare DB and Whoosh Index
     print("\n🔍 Compare DB and Index:")
-    compare_pdf_index_and_db()
+    compare_index_and_db()

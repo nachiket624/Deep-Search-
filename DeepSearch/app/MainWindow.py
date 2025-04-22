@@ -16,17 +16,17 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QGridLayout,
-    QHBoxLayout, QHeaderView, QLabel, QLineEdit,
-    QMainWindow, QMenu, QMenuBar, QPushButton,
-    QSizePolicy, QStackedWidget, QStatusBar, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFormLayout, QFrame,
+    QGridLayout, QHBoxLayout, QHeaderView, QLabel,
+    QLineEdit, QMainWindow, QMenu, QMenuBar,
+    QPushButton, QSizePolicy, QSpacerItem, QStackedWidget,
+    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1030, 485)
+        MainWindow.resize(1026, 476)
         MainWindow.setAnimated(False)
         self.actionView = QAction(MainWindow)
         self.actionView.setObjectName(u"actionView")
@@ -172,6 +172,85 @@ class Ui_MainWindow(object):
         self.stackedWidget.addWidget(self.Mainpage)
         self.Settings = QWidget()
         self.Settings.setObjectName(u"Settings")
+        self.gridLayout_3 = QGridLayout(self.Settings)
+        self.gridLayout_3.setObjectName(u"gridLayout_3")
+        self.gridLayout_2 = QGridLayout()
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_2.addItem(self.horizontalSpacer_3, 1, 0, 1, 1)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_2.addItem(self.horizontalSpacer_4, 1, 2, 1, 1)
+
+        self.verticalLayout_3 = QVBoxLayout()
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.formLayout = QFormLayout()
+        self.formLayout.setObjectName(u"formLayout")
+        self.label = QLabel(self.Settings)
+        self.label.setObjectName(u"label")
+
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
+
+        self.dbusername = QLineEdit(self.Settings)
+        self.dbusername.setObjectName(u"dbusername")
+
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.dbusername)
+
+        self.label_2 = QLabel(self.Settings)
+        self.label_2.setObjectName(u"label_2")
+
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
+
+        self.dbpass = QLineEdit(self.Settings)
+        self.dbpass.setObjectName(u"dbpass")
+        self.dbpass.setEchoMode(QLineEdit.Password)
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.dbpass)
+
+
+        self.verticalLayout_3.addLayout(self.formLayout)
+
+        self.dbconnectioninfo = QLabel(self.Settings)
+        self.dbconnectioninfo.setObjectName(u"dbconnectioninfo")
+        self.dbconnectioninfo.setStyleSheet(u"color:rgb(255, 0, 0);\n"
+"font: 11pt \"Consolas\";")
+
+        self.verticalLayout_3.addWidget(self.dbconnectioninfo)
+
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_2)
+
+        self.btndbconnct = QPushButton(self.Settings)
+        self.btndbconnct.setObjectName(u"btndbconnct")
+
+        self.horizontalLayout_4.addWidget(self.btndbconnct)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer)
+
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_4)
+
+
+        self.gridLayout_2.addLayout(self.verticalLayout_3, 1, 1, 1, 1)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        self.gridLayout_2.addItem(self.verticalSpacer, 2, 1, 1, 1)
+
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        self.gridLayout_2.addItem(self.verticalSpacer_2, 0, 1, 1, 1)
+
+
+        self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
+
         self.stackedWidget.addWidget(self.Settings)
 
         self.horizontalLayout_3.addWidget(self.stackedWidget)
@@ -179,7 +258,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1030, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1026, 22))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuEdit = QMenu(self.menubar)
@@ -189,9 +268,6 @@ class Ui_MainWindow(object):
         self.menuSearch = QMenu(self.menubar)
         self.menuSearch.setObjectName(u"menuSearch")
         MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QStatusBar(MainWindow)
-        self.statusbar.setObjectName(u"statusbar")
-        MainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -237,6 +313,9 @@ class Ui_MainWindow(object):
         self.actionSettings.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.actionTheam.setText(QCoreApplication.translate("MainWindow", u"Theam", None))
         self.advsearchbtn.setText("")
+#if QT_CONFIG(shortcut)
+        self.advsearchbtn.setShortcut(QCoreApplication.translate("MainWindow", u"F7", None))
+#endif // QT_CONFIG(shortcut)
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Name", None));
         ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
@@ -250,6 +329,10 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem5 = self.tableWidget.verticalHeaderItem(0)
         ___qtablewidgetitem5.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
         self.processlabel.setText(QCoreApplication.translate("MainWindow", u"process info", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Database Username", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Database Password", None))
+        self.dbconnectioninfo.setText(QCoreApplication.translate("MainWindow", u"Hello", None))
+        self.btndbconnct.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))
         self.menuEdit_2.setTitle(QCoreApplication.translate("MainWindow", u"View", None))
