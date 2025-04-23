@@ -5,7 +5,7 @@ from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from dbconnection.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection,formatdate
-from core.indextxt import remove_file_from_index,add_file_to_index
+from core.indextxt import remove_file_from_index,add_file_to_index,update_file_in_index
 
 logging.basicConfig(
     filename='deepsearchapp.log',
@@ -45,7 +45,7 @@ class FileEventHandler(FileSystemEventHandler):
         if not event.is_directory:
             logging.info(f"File modified: {event.src_path}")
             update_file_record(event.src_path)
-
+            update_file_in_index(event.src_path)
     def on_created(self, event):
         if not event.is_directory:
             logging.info(f"File created: {event.src_path}")
@@ -61,8 +61,12 @@ class FileEventHandler(FileSystemEventHandler):
     def on_moved(self, event):
         if not event.is_directory:
             logging.info(f"File moved from {event.src_path} to {event.dest_path}")
-            update_file_record(event.dest_path)
-            update_file_record(event.src_path)
+            if not event.is_directory:
+                logging.info(f"File renamed/moved from {event.src_path} to {event.dest_path}")
+                remove_file_from_index(event.src_path)
+                if event.dest_path.lower().endswith(".txt"):
+                    update_file_record(event.dest_path)
+                    add_file_to_index(event.dest_path)
 
 def main():
     directory ="C:/"

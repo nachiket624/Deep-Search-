@@ -54,11 +54,9 @@ class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
         for row, item in enumerate(data):
             self.tableWidget.setItem(row, 0, QTableWidgetItem(str(item[0])))
             self.tableWidget.setItem(row, 1, QTableWidgetItem(item[1]))
-
-            # ✅ Only column 2 (index 2) has word-wrapped text
             preview_item = QTableWidgetItem(item[2])
             preview_item.setTextAlignment(Qt.AlignLeft | Qt.AlignTop)
-            preview_item.setFlags(preview_item.flags() ^ Qt.ItemIsEditable)  # Optional: make read-only
+            preview_item.setFlags(preview_item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(row, 2, preview_item)
         self.tableWidget.resizeRowsToContents()
     def open_path_in_explorer(self, row, column):

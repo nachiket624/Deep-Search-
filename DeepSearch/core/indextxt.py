@@ -214,11 +214,12 @@ def remove_file_from_index(file_path):
 
 
 if __name__ == "__main__":
-    index_txt_files_from_mysql()
+    pass
+    # index_txt_files_from_mysql()
     # print("\n🔍 Compare DB and Index:")
 
     # Example testing:
-    # test_file = r"C:\Users\nachi\Documents\sample.txt"
+    # test_file = r"C:/Users/nachi/Documents/my name is nachiket id 9922.txt"
     # add_file_to_index(test_file)
     # update_file_in_index(test_file)
     # remove_file_from_index(test_file)
