@@ -13,6 +13,7 @@ from dbconnection.db_utils import (
 )
 from core.indextxt import add_file_to_index as add_txt, update_file_in_index as update_txt, remove_file_from_index as remove_txt
 from core.indexdoc import add_doc_to_index as add_doc, update_doc_in_index as update_doc, remove_doc_from_index as remove_doc
+from core.indexpdf import add_pdf_to_index as add_pdf, update_pdf_in_index as update_pdf, remove_pdf_from_index as remove_pdf  # PDF imports
 
 # Log file maintenance
 LOG_FILE = 'deepsearchapp.log'
@@ -26,6 +27,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
 def update_file_record(filepath):
     try:
         conn = get_db_connection()
@@ -69,6 +71,13 @@ def handle_indexing(file_path, action):
             update_doc(file_path)
         elif action == "remove":
             remove_doc(file_path)
+    elif ext == ".pdf":
+        if action == "add":
+            add_pdf(file_path)
+        elif action == "update":
+            update_pdf(file_path)
+        elif action == "remove":
+            remove_pdf(file_path)
 
 class FileEventHandler(FileSystemEventHandler):
     def on_modified(self, event):
