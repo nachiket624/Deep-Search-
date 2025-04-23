@@ -1,9 +1,7 @@
 import os
-import shutil
 import mysql.connector
 from whoosh.index import create_in, open_dir,exists_in
 from whoosh.fields import Schema, TEXT, ID
-from whoosh.qparser import QueryParser
 from dbconnection.db_utils import get_db_connection
 
 # Define Whoosh schema
