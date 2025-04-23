@@ -1,13 +1,10 @@
 from PySide6 import QtWidgets
 from PySide6 import QtCore
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import *
 import sys
-# from qt_material import apply_stylesheet
 import qdarktheme
 import qtawesome as qta
-from search.simplesearch import search_files_db
 from app.MainWindow import Ui_MainWindow
 import app.loaddialogs as loaddialogs
 from dbconnection.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection
@@ -15,7 +12,6 @@ from dbconnection.db_utils import create_database_if_not_exists,create_table,ALL
 EXTENSION_GROUPS = ALLOWED_EXTENSIONS
 
 def fetch_all_files():
-    """Fetch all file records from the MySQL database."""
     conn = get_db_connection(use_database=True)
     if conn is None:
         return
@@ -65,8 +61,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle("Deep Search")
         self.setWindowIcon(QIcon('./assets/icon.png'))
-        self.data = fetch_all_files()  # Fetch data from MySQL
-        self.tableWidget.setRowCount(len(self.data))  # Set row count
+        self.data = fetch_all_files()
+        self.tableWidget.setRowCount(len(self.data))
         self.tablestyle()
         self.update_table()
         adjicon = qta.icon('ei.adjust-alt')
@@ -90,7 +86,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def tablestyle(self):
-        """Set table styles and column widths."""
         self.tableWidget.verticalHeader().setDefaultSectionSize(30)
         table_header = ["Name", "Path", "Type", "Modification Time", "Size (bytes)"]
         self.tableWidget.setHorizontalHeaderLabels(table_header)
@@ -99,7 +94,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidget.setColumnWidth(col, width)
 
     def update_table(self):
-        """Update table with data from MySQL."""
         if not self.data:
             return
 
@@ -112,7 +106,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidget.setItem(row, 4, QTableWidgetItem(str(entry.get("size", "N/A"))))
 
     def Search(self):
-        """Perform search in the MySQL database."""
         actions = [self.music,self.doc,self.picture,self.video,self.exe,self.compressed]
         enabled_actions = get_enabled_actions(actions)
         filetype = ([action.text() for action in enabled_actions])
@@ -132,22 +125,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             QMessageBox.information(self, "No Results", "No matching files found.")
 
     def showadvsearchdig(self, checked):
-        """Show advanced search dialog."""
         if self.w is None:
-            self.w = loaddialogs.LoadAdvSearch(self)  # Pass main window reference
-            self.w.setAttribute(QtCore.Qt.WA_DeleteOnClose)  # Ensures proper cleanup
+            self.w = loaddialogs.LoadAdvSearch(self)
+            self.w.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.w.show()
-            self.w.destroyed.connect(self.clear_dialog_reference)  # Reset reference when closed
+            self.w.destroyed.connect(self.clear_dialog_reference)
         else:
-            self.w.raise_()  # Bring the window to the front
-            self.w.activateWindow()  # Focus the window
+            self.w.raise_()
+            self.w.activateWindow()
 
     def clear_dialog_reference(self):
-        """Clear dialog reference when it is closed."""
+
         self.w = None
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    # apply_stylesheet(app, theme='dark_purple.xml')
     qdarktheme.setup_theme()
     window = MainWindow()
     create_database_if_not_exists()
