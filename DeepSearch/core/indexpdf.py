@@ -6,7 +6,7 @@ from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
-from db.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection
+from dbconnection.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection
 
 schema = Schema(
     filename=TEXT(stored=True),
