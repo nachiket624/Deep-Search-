@@ -14,9 +14,6 @@ from dbconnection.db_utils import (
 from core.indextxt import add_file_to_index as add_txt, update_file_in_index as update_txt, remove_file_from_index as remove_txt
 from core.indexdoc import add_doc_to_index as add_doc, update_doc_in_index as update_doc, remove_doc_from_index as remove_doc
 
-from core.indextxt import add_file_to_index as add_txt, update_file_in_index as update_txt, remove_file_from_index as remove_txt
-from core.indexdoc import add_doc_to_index as add_doc, update_doc_in_index as update_doc, remove_doc_from_index as remove_doc
-
 # Log file maintenance
 LOG_FILE = 'deepsearchapp.log'
 MAX_LOG_SIZE_MB = 20
