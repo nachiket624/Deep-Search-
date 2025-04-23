@@ -26,7 +26,7 @@ def fetch_all_files():
     return []
 
 def search_files_in_db(filename, filetypes=None):
-    conn = connect_db()
+    conn = get_db_connection()
     if filetypes: 
         typelist = {ext for ft in filetypes if ft in EXTENSION_GROUPS for ext in EXTENSION_GROUPS[ft]}
     else: 
