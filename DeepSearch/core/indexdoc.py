@@ -185,11 +185,3 @@ def remove_doc_from_index(file_path):
         print(f"🗑️ Removed from index: {file_path}")
     except Exception as e:
         print(f"❌ Failed to remove {file_path}: {e}")
-
-if __name__ == "__main__":
-    # index_doc_files_from_mysql()
-    # file_path = r"C:\Users\nachi\Documents\Doc my name is nachiket id 9920.docx"
-    # add_doc_to_index(file_path)
-    # update_doc_in_index(r"C:\Users\you\Documents\sample.doc")
-    # remove_doc_from_index(r"C:\Users\you\Documents\sample.docx")
-    pass

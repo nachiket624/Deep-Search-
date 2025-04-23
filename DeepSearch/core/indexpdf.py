@@ -226,11 +226,3 @@ def remove_pdf_from_index(file_path):
     except Exception as e:
         print(f"❌ Failed to remove {file_path}: {e}")
 
-if __name__ == "__main__":
-    # Example usage:
-    # index_pdf_files_from_mysql()
-    # test_pdf_file = r"C://Users//nachi//Downloads//Nachiket.pdf"
-    # add_pdf_to_index(test_pdf_file)
-    # update_pdf_in_index(test_pdf_file)
-    # remove_pdf_from_index(test_pdf_file)
-    pass

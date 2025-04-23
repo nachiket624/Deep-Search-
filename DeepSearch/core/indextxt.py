@@ -209,15 +209,3 @@ def remove_file_from_index(file_path):
         print(f"🗑️ Removed from index: {file_path}")
     except Exception as e:
         print(f"❌ Failed to remove {file_path}: {e}")
-
-
-if __name__ == "__main__":
-    pass
-    # index_txt_files_from_mysql()
-    # print("\n🔍 Compare DB and Index:")
-
-    # Example testing:
-    # test_file = r"C:/Users/nachi/Documents/my name is nachiket id 9922.txt"
-    # add_file_to_index(test_file)
-    # update_file_in_index(test_file)
-    # remove_file_from_index(test_file)
