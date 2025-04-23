@@ -5,7 +5,7 @@ from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from dbconnection.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection,formatdate
-
+from core.indextxt import remove_file_from_index,add_file_to_index
 
 logging.basicConfig(
     filename='deepsearchapp.log',
@@ -50,11 +50,13 @@ class FileEventHandler(FileSystemEventHandler):
         if not event.is_directory:
             logging.info(f"File created: {event.src_path}")
             update_file_record(event.src_path)
+            add_file_to_index(event.src_path)
 
     def on_deleted(self, event):
         if not event.is_directory:
             logging.info(f"File deleted: {event.src_path}")
             update_file_record(event.src_path)
+            remove_file_from_index(event.src_path)
 
     def on_moved(self, event):
         if not event.is_directory:
@@ -63,7 +65,7 @@ class FileEventHandler(FileSystemEventHandler):
             update_file_record(event.src_path)
 
 def main():
-    directory = input("Enter the directory path to monitor: ")
+    directory ="C:/"
     if not os.path.isdir(directory):
         logging.error(f"Invalid directory path entered: {directory}")
         return
