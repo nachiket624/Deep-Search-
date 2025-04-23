@@ -4,8 +4,15 @@ import logging
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from dbconnection.db_utils import create_database_if_not_exists,create_table,ALLOWED_EXTENSIONS,get_db_connection,formatdate
-from core.indextxt import remove_file_from_index,add_file_to_index,update_file_in_index
+from dbconnection.db_utils import (
+    create_database_if_not_exists,
+    create_table,
+    ALLOWED_EXTENSIONS,
+    get_db_connection,
+    formatdate
+)
+from core.indextxt import add_file_to_index as add_txt, update_file_in_index as update_txt, remove_file_from_index as remove_txt
+from core.indexdoc import add_doc_to_index as add_doc, update_doc_in_index as update_doc, remove_doc_from_index as remove_doc
 
 logging.basicConfig(
     filename='deepsearchapp.log',
@@ -40,36 +47,51 @@ def update_file_record(filepath):
         if conn:
             conn.close()
 
+def handle_indexing(file_path, action):
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".txt":
+        if action == "add":
+            add_txt(file_path)
+        elif action == "update":
+            update_txt(file_path)
+        elif action == "remove":
+            remove_txt(file_path)
+    elif ext in [".doc", ".docx"]:
+        if action == "add":
+            add_doc(file_path)
+        elif action == "update":
+            update_doc(file_path)
+        elif action == "remove":
+            remove_doc(file_path)
+
 class FileEventHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if not event.is_directory:
             logging.info(f"File modified: {event.src_path}")
             update_file_record(event.src_path)
-            update_file_in_index(event.src_path)
+            handle_indexing(event.src_path, "update")
+
     def on_created(self, event):
         if not event.is_directory:
             logging.info(f"File created: {event.src_path}")
             update_file_record(event.src_path)
-            add_file_to_index(event.src_path)
+            handle_indexing(event.src_path, "add")
 
     def on_deleted(self, event):
         if not event.is_directory:
             logging.info(f"File deleted: {event.src_path}")
             update_file_record(event.src_path)
-            remove_file_from_index(event.src_path)
+            handle_indexing(event.src_path, "remove")
 
     def on_moved(self, event):
         if not event.is_directory:
             logging.info(f"File moved from {event.src_path} to {event.dest_path}")
-            if not event.is_directory:
-                logging.info(f"File renamed/moved from {event.src_path} to {event.dest_path}")
-                remove_file_from_index(event.src_path)
-                if event.dest_path.lower().endswith(".txt"):
-                    update_file_record(event.dest_path)
-                    add_file_to_index(event.dest_path)
+            handle_indexing(event.src_path, "remove")
+            update_file_record(event.dest_path)
+            handle_indexing(event.dest_path, "add")
 
 def main():
-    directory ="C:/"
+    directory = "C:/"
     if not os.path.isdir(directory):
         logging.error(f"Invalid directory path entered: {directory}")
         return

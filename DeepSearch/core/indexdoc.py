@@ -1,113 +1,195 @@
 import os
-import shutil
-import mysql.connector
-from whoosh.index import create_in, open_dir
-from whoosh.fields import Schema, TEXT, ID
-from whoosh.qparser import QueryParser
+import textract
 from docx import Document
+import mysql.connector
+from whoosh.index import create_in, open_dir, exists_in
+from whoosh.fields import Schema, TEXT, ID
 from dbconnection.db_utils import get_db_connection
 
-# Whoosh schema
+# Reuse same schema as txt
 schema = Schema(
     filename=TEXT(stored=True),
     filepath=ID(stored=True, unique=True),
     content_preview=TEXT(stored=True)
 )
 
-# Function to extract text from .docx
-def extract_docx_text(path):
+user_profile = os.environ.get("USERPROFILE", r"C:\Users\Default")
+appdata_path = os.path.join(user_profile, "AppData")
+index_dir = os.path.abspath(r"..\indexfiles\docx_index")
+
+EXCLUDED_DIRS = [
+    os.environ.get("ProgramFiles", r"C:\Program Files"),
+    os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
+    r"C:\Windows",
+    r"C:\PerfLogs",
+    index_dir,
+    appdata_path
+]
+
+def get_excluded_dirs():
+    return EXCLUDED_DIRS
+
+def is_excluded_path(path):
+    norm_path = os.path.abspath(os.path.normpath(path)).lower()
+    return any(norm_path.startswith(ex.lower()) for ex in get_excluded_dirs())
+
+def is_valid_doc_file(path):
+    return path.lower().endswith(('.doc', '.docx')) and not is_excluded_path(path)
+
+def extract_text_from_doc(path):
     try:
-        doc = Document(path)
-        return '\n'.join([para.text for para in doc.paragraphs])
+        if path.lower().endswith('.docx'):
+            doc = Document(path)
+            return '\n'.join([p.text for p in doc.paragraphs])
+        elif path.lower().endswith('.doc'):
+            return textract.process(path).decode('utf-8', errors='ignore')
     except Exception as e:
-        print(f"⚠️ Error reading {path}: {e}")
-        return ""
+        print(f"❌ Error reading {path}: {e}")
+    return ""
 
-# Index .docx files from MySQL
-def index_docx_files_from_mysql():
-    index_dir = "docx_index"
+def get_indexed_file_paths_from_whoosh(index_dir):
+    paths = []
+    if not os.path.exists(index_dir):
+        print(f"⚠️ Index directory not found: {index_dir}")
+        return paths
 
-    # Reset index
-    if os.path.exists(index_dir):
-        shutil.rmtree(index_dir)
-    os.mkdir(index_dir)
+    try:
+        ix = open_dir(index_dir)
+        with ix.searcher() as searcher:
+            for doc in searcher.all_documents():
+                paths.append(doc['filepath'])
+    except Exception as e:
+        print(f"Error reading index: {e}")
 
-    # Create Whoosh index
-    ix = create_in(index_dir, schema)
+    return paths
+
+def index_doc_files_from_mysql():
+    if os.path.exists(index_dir) and exists_in(index_dir):
+        ix = open_dir(index_dir)
+    else:
+        os.makedirs(index_dir, exist_ok=True)
+        ix = create_in(index_dir, schema)
+
     writer = ix.writer()
 
-    # System folders to skip
-    excluded_dirs = [
-        os.environ.get("ProgramFiles", r"C:\Program Files"),
-        os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
-        r"C:\Windows",
-        r"C:\PerfLogs"
-    ]
-    excluded_dirs = [os.path.normpath(p).lower() for p in excluded_dirs]
-
     try:
-        conn = get_db_connection(use_database=False)
+        conn = get_db_connection(use_database=True)
         if conn is None:
             return
-        cursor = conn.cursor()
-        cursor.execute("SELECT name, path FROM files WHERE type = '.docx'")
 
-        for (name, path) in cursor.fetchall():
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, path FROM files WHERE type IN ('.doc', '.docx')")
+        db_files = cursor.fetchall()
+
+        existing_indexed_paths = set(get_indexed_file_paths_from_whoosh(index_dir))
+        indexed_now = set()
+
+        for (name, path) in db_files:
             try:
-                norm_path = os.path.normpath(path).lower()
-                if any(norm_path.startswith(ex_dir) for ex_dir in excluded_dirs):
-                    print(f"⛔ Skipping system file: {path}")
+                if not is_valid_doc_file(path):
+                    print(f"⛔ Skipping: {path}")
                     continue
 
-                content = extract_docx_text(path)
-                if content.strip():
-                    preview = content[:1000]
+                if not os.path.exists(path):
+                    print(f"🗑️ File missing: {path}")
+                    writer.delete_by_term("filepath", path)
+                    continue
+
+                content = extract_text_from_doc(path)
+                preview = content[:1000]
+
+                if path in existing_indexed_paths:
+                    writer.update_document(
+                        filename=name,
+                        filepath=path,
+                        content_preview=preview
+                    )
+                    print(f"🔁 Updated: {path}")
+                else:
                     writer.add_document(
                         filename=name,
                         filepath=path,
                         content_preview=preview
                     )
-                    print(f"✅ Indexed: {path}")
-                else:
-                    print(f"⚠️ Empty or unreadable: {path}")
-            except Exception as file_error:
-                print(f"❌ Could not process file {path}: {file_error}")
+                    print(f"➕ Indexed: {path}")
 
+                indexed_now.add(path)
+
+            except Exception as e:
+                print(f"❌ Error indexing {path}: {e}")
+
+        for path in existing_indexed_paths - indexed_now:
+            print(f"🧹 Removing stale index entry: {path}")
+            writer.delete_by_term("filepath", path)
+
+        writer.commit()
         cursor.close()
         conn.close()
-        writer.commit()
-        print("✅ Indexing of DOCX files completed.")
+        print("✅ Doc indexing complete.")
 
-    except mysql.connector.Error as db_error:
-        print(f"MySQL error: {db_error}")
+    except mysql.connector.Error as err:
+        print(f"MySQL error: {err}")
 
-# Search Whoosh index
-def search_docx(query_str):
-    index_dir = "docx_index"
-    results_list = []
+def add_doc_to_index(file_path):
+    if not is_valid_doc_file(file_path):
+        print(f"⛔ Invalid doc file: {file_path}")
+        return
+
+    content = extract_text_from_doc(file_path)
+    preview = content[:1000]
 
     try:
         ix = open_dir(index_dir)
-        with ix.searcher() as searcher:
-            query = QueryParser("content_preview", ix.schema).parse(query_str)
-            results = searcher.search(query, limit=10)
-
-            for result in results:
-                results_list.append([
-                    result["filename"],
-                    result["filepath"],
-                    result["content_preview"]
-                ])
+        writer = ix.writer()
+        writer.add_document(
+            filename=os.path.basename(file_path),
+            filepath=file_path,
+            content_preview=preview
+        )
+        writer.commit()
+        print(f"✅ Added to index: {file_path}")
     except Exception as e:
-        print(f"Error during search: {e}")
+        print(f"❌ Failed to add {file_path}: {e}")
 
-    return results_list
+def update_doc_in_index(file_path):
+    if not is_valid_doc_file(file_path):
+        print(f"⛔ Invalid doc file: {file_path}")
+        return
 
-# Run everything
+    content = extract_text_from_doc(file_path)
+    preview = content[:1000]
+
+    try:
+        ix = open_dir(index_dir)
+        writer = ix.writer()
+        writer.update_document(
+            filename=os.path.basename(file_path),
+            filepath=file_path,
+            content_preview=preview
+        )
+        writer.commit()
+        print(f"🔄 Updated index for: {file_path}")
+    except Exception as e:
+        print(f"❌ Failed to update {file_path}: {e}")
+
+def remove_doc_from_index(file_path):
+    if not is_valid_doc_file(file_path):
+        print(f"⛔ Invalid doc file: {file_path}")
+        return
+
+    try:
+        ix = open_dir(index_dir)
+        writer = ix.writer()
+        writer.delete_by_term('filepath', file_path)
+        writer.commit()
+        print(f"🗑️ Removed from index: {file_path}")
+    except Exception as e:
+        print(f"❌ Failed to remove {file_path}: {e}")
+
 if __name__ == "__main__":
-    index_docx_files_from_mysql()
-
-    print("\n🔎 Search Results for 'invoice':")
-    results = search_docx("invoice")
-    for filename, filepath, preview in results:
-        print(f"\n📄 {filename} ({filepath})\n{preview[:200]}...\n")
+    # index_doc_files_from_mysql()
+    file_path = r"C:\Users\nachi\Documents\Doc my name is nachiket id 9920.docx"
+    add_doc_to_index(file_path)
+    # update_doc_in_index(r"C:\Users\you\Documents\sample.doc")
+    # remove_doc_from_index(r"C:\Users\you\Documents\sample.docx")
+    pass
