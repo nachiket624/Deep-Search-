@@ -14,12 +14,21 @@ from dbconnection.db_utils import (
 from core.indextxt import add_file_to_index as add_txt, update_file_in_index as update_txt, remove_file_from_index as remove_txt
 from core.indexdoc import add_doc_to_index as add_doc, update_doc_in_index as update_doc, remove_doc_from_index as remove_doc
 
+from core.indextxt import add_file_to_index as add_txt, update_file_in_index as update_txt, remove_file_from_index as remove_txt
+from core.indexdoc import add_doc_to_index as add_doc, update_doc_in_index as update_doc, remove_doc_from_index as remove_doc
+
+# Log file maintenance
+LOG_FILE = 'deepsearchapp.log'
+MAX_LOG_SIZE_MB = 20
+
+if os.path.exists(LOG_FILE) and os.path.getsize(LOG_FILE) > MAX_LOG_SIZE_MB * 1024 * 1024:
+    os.remove(LOG_FILE)
+
 logging.basicConfig(
-    filename='deepsearchapp.log',
+    filename=LOG_FILE,
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
-
 def update_file_record(filepath):
     try:
         conn = get_db_connection()
