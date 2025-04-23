@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from db_utils import get_db_connection, create_database, ALLOWED_EXTENSIONS
+from dbconnection.db_utils import create_database_if_not_exists,ALLOWED_EXTENSIONS,get_db_connection
 
 def scan_directory(directory):
     """Scans the directory and updates the database with allowed files."""
@@ -42,11 +42,11 @@ def check_existing_records():
     conn.close()
 
 def main():
-    directory = input("Enter the directory path to index: ")
+    directory = "C:/"
     if not os.path.isdir(directory):
         print("Invalid directory path!")
         return
-    create_database()
+    create_database_if_not_exists()
     scan_directory(directory)
     check_existing_records()
     print("Indexing complete.")
