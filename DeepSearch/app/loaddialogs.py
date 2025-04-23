@@ -43,7 +43,7 @@ class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
         txtdata = searchtxt.search_files(phrase)
         data = docdata + pdfdata + txtdata
         self.tableWidget.setWordWrap(True)
-        self.tableWidget.setRowCount(len(data)+1) 
+        self.tableWidget.setRowCount(len(data))
         self.tableWidget.setColumnCount(3)  
         self.tableWidget.setHorizontalHeaderLabels(["Title", "Path", "Content Preview"])
         
