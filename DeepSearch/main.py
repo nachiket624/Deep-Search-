@@ -1,5 +1,6 @@
 from PySide6 import QtWidgets
 from PySide6 import QtCore
+from PySide6.QtGui import QIcon
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import *
 import sys
@@ -63,6 +64,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.w1 = None
         self.setupUi(self)
         self.setWindowTitle("Deep Search")
+        self.setWindowIcon(QIcon('./assets/icon.png'))
         self.data = fetch_all_files()  # Fetch data from MySQL
         self.tableWidget.setRowCount(len(self.data))  # Set row count
         self.tablestyle()
