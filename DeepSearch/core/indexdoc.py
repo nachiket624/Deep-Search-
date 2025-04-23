@@ -5,7 +5,7 @@ from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser
 from docx import Document
-from db.db_utils import get_db_connection
+from dbconnection.db_utils import get_db_connection
 
 # Whoosh schema
 schema = Schema(
