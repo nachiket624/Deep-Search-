@@ -4,6 +4,8 @@ import logging
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+import psutil  # <-- NEW IMPORT
+
 from dbconnection.db_utils import (
     create_database_if_not_exists,
     create_table,
@@ -13,9 +15,9 @@ from dbconnection.db_utils import (
 )
 from core.indextxt import add_file_to_index as add_txt, update_file_in_index as update_txt, remove_file_from_index as remove_txt
 from core.indexdoc import add_doc_to_index as add_doc, update_doc_in_index as update_doc, remove_doc_from_index as remove_doc
-from core.indexpdf import add_pdf_to_index as add_pdf, update_pdf_in_index as update_pdf, remove_pdf_from_index as remove_pdf  # PDF imports
+from core.indexpdf import add_pdf_to_index as add_pdf, update_pdf_in_index as update_pdf, remove_pdf_from_index as remove_pdf
 
-# Log file maintenance
+# --- Log file maintenance ---
 LOG_FILE = 'deepsearchapp.log'
 MAX_LOG_SIZE_MB = 20
 
@@ -28,6 +30,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# --- DB Update Function ---
 def update_file_record(filepath):
     try:
         conn = get_db_connection()
@@ -55,6 +58,7 @@ def update_file_record(filepath):
         if conn:
             conn.close()
 
+# --- File Indexing Dispatcher ---
 def handle_indexing(file_path, action):
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".txt":
@@ -79,6 +83,7 @@ def handle_indexing(file_path, action):
         elif action == "remove":
             remove_pdf(file_path)
 
+# --- Watchdog Event Handler ---
 class FileEventHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if not event.is_directory:
@@ -105,27 +110,46 @@ class FileEventHandler(FileSystemEventHandler):
             update_file_record(event.dest_path)
             handle_indexing(event.dest_path, "add")
 
+# --- Get Internal Drives ---
+def get_internal_drives():
+    drives = []
+    partitions = psutil.disk_partitions(all=False)
+    for p in partitions:
+        if ('fixed' in p.opts.lower() or p.fstype) and os.path.isdir(p.mountpoint):
+            drives.append(p.mountpoint)
+    return drives
+
+# --- Main Function ---
 def main():
-    directory = "C:/"
-    if not os.path.isdir(directory):
-        logging.error(f"Invalid directory path entered: {directory}")
+    drives = get_internal_drives()
+    if not drives:
+        logging.error("No valid internal drives found to monitor.")
         return
+
     create_database_if_not_exists()
     create_table()
-    logging.info(f"Monitoring started on: {directory}")
-    event_handler = FileEventHandler()
-    observer = Observer()
-    observer.schedule(event_handler, directory, recursive=True)
-    observer.start()
+
+    observers = []
+    for drive in drives:
+        logging.info(f"Monitoring started on: {drive}")
+        event_handler = FileEventHandler()
+        observer = Observer()
+        observer.schedule(event_handler, drive, recursive=True)
+        observer.start()
+        observers.append(observer)
+
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        observer.stop()
+        for observer in observers:
+            observer.stop()
         logging.info("Monitoring stopped by user.")
     except Exception as e:
         logging.exception("Unexpected error occurred in observer loop.")
-    observer.join()
+    finally:
+        for observer in observers:
+            observer.join()
 
 if __name__ == "__main__":
     main()

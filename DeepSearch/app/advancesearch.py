@@ -25,7 +25,8 @@ def validate_date(date_str):
 def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None, 
                min_size=None, max_size=None, match_case=False, match_whole_word=False, 
                match_diacritics=False, exclude_words=None, 
-               match_case_exclude=False, match_whole_word_exclude=False, match_diacritics_exclude=False):
+               match_case_exclude=False, match_whole_word_exclude=False, match_diacritics_exclude=False,
+               folder_path=None):
     try:
         # Establish the connection
         conn = mysql.connector.connect(
@@ -39,6 +40,16 @@ def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None
         # Base query and values list
         conditions = ["1=1"]  
         values = []
+
+        # Handle folder path filtering
+        if folder_path:
+            print(folder_path)
+            normalized_path = folder_path.replace("/", "\\").lower().strip("\\")
+            parts = [part for part in normalized_path.split("\\") if part]
+            if parts:
+                like_pattern = parts[0] + "%" + "%".join(parts[1:]) + "%"
+                conditions.append("LOWER(path) LIKE %s")
+                values.append(like_pattern)
 
         # Handle name pattern matching
         if name_pattern:
@@ -67,13 +78,13 @@ def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None
             values.append(end_date)
 
         # Filter by file size
-        if min_size and max_size:
+        if min_size is not None and max_size is not None:
             conditions.append("size BETWEEN %s AND %s")
             values.extend([min_size, max_size])
-        elif min_size:
+        elif min_size is not None:
             conditions.append("size >= %s")
             values.append(min_size)
-        elif max_size:
+        elif max_size is not None:
             conditions.append("size <= %s")
             values.append(max_size)
 
@@ -93,6 +104,7 @@ def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None
 
         # Execute query
         cursor.execute(query, values)
+        print(format_query(query,values))
         results = [list(row) for row in cursor.fetchall()]  # Convert tuples to lists
 
         # Close resources
@@ -105,39 +117,19 @@ def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None
         logging.error("Database error occurred", exc_info=True)
         return []
 
-# User input with defaults
-if __name__ == "__main__":
-    name_pattern = input("Enter name pattern (leave blank to ignore): ") or None
-    file_type = input("Enter file type (leave blank to ignore): ") or None
-    start_date = validate_date(input("Enter start date (YYYY-MM-DD, leave blank to ignore): "))
-    end_date = validate_date(input("Enter end date (YYYY-MM-DD, leave blank to ignore): "))
+
+def format_query(query, values):
+    def format_value(v):
+        if isinstance(v, str):
+            return f"'{v}'"
+        elif v is None:
+            return 'NULL'
+        else:
+            return str(v)
     
-    min_size = input("Enter minimum file size (bytes, leave blank to ignore): ")
-    max_size = input("Enter maximum file size (bytes, leave blank to ignore): ")
+    parts = query.split('%s')
+    full_query = ''
+    for part, val in zip(parts, values + ['']):
+        full_query += part + format_value(val)
+    return full_query
 
-    # Convert size inputs to integers if provided
-    min_size = int(min_size) if min_size else None
-    max_size = int(max_size) if max_size else None
-
-    # Filename match options
-    match_case = input("Match case for filename? (yes/no): ").strip().lower() == 'yes'
-    match_whole_word = input("Match whole word for filename? (yes/no): ").strip().lower() == 'yes'
-    match_diacritics = input("Match diacritics for filename? (yes/no): ").strip().lower() == 'yes'
-
-    # Exclude words input
-    exclude_words_input = input("Enter words to exclude (comma-separated, leave blank to ignore): ")
-    exclude_words = [word.strip() for word in exclude_words_input.split(',')] if exclude_words_input else None
-
-    # Exclude words match options
-    match_case_exclude = input("Match case for excluding words? (yes/no): ").strip().lower() == 'yes'
-    match_whole_word_exclude = input("Match whole word for excluding words? (yes/no): ").strip().lower() == 'yes'
-    match_diacritics_exclude = input("Match diacritics for excluding words? (yes/no): ").strip().lower() == 'yes'
-
-    # Fetch and display results
-    results = fetch_data(name_pattern, file_type, start_date, end_date, min_size, max_size, 
-                         match_case, match_whole_word, match_diacritics, 
-                         exclude_words, match_case_exclude, match_whole_word_exclude, match_diacritics_exclude)
-
-    # Output results as list of lists
-    print("\nResults (List of Lists):")
-    print(results)
