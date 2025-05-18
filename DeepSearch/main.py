@@ -1,14 +1,16 @@
 from PySide6 import QtWidgets
 from PySide6 import QtCore
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import *
 import sys
+<<<<<<< HEAD
 import os
 import json
 from getpass import getpass
 from cryptography.fernet import Fernet
 # from qt_material import apply_stylesheet
+=======
+>>>>>>> 5e259c9d95ba3fc13de99484dc4c63c4fea32dfa
 import qdarktheme
 import qtawesome as qta
 from app.MainWindow import Ui_MainWindow
@@ -24,6 +26,7 @@ LOG_FILE = "deepsearchapp.log"
 DB_HOST = "localhost"
 DB_NAME = "dbdeepsearch"
 
+<<<<<<< HEAD
 basedir = os.path.dirname(__file__)
 try:
     from ctypes import windll  
@@ -31,6 +34,18 @@ try:
     windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 except ImportError:
     pass
+=======
+def fetch_all_files():
+    conn = get_db_connection(use_database=True)
+    if conn is None:
+        return
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT name, path, type, modification_time, size FROM files LIMIT 100")
+    data = cursor.fetchall()
+    conn.close()
+    return data
+    return []
+>>>>>>> 5e259c9d95ba3fc13de99484dc4c63c4fea32dfa
 
 
 def get_enabled_actions(actions):
@@ -79,7 +94,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle("Deep Search")
         self.setWindowIcon(QIcon('./assets/icon.png'))
+<<<<<<< HEAD
         QtCore.QTimer.singleShot(0, self.post_ui_load)
+=======
+        self.data = fetch_all_files()
+        self.tableWidget.setRowCount(len(self.data))
+        self.tablestyle()
+        self.update_table()
+>>>>>>> 5e259c9d95ba3fc13de99484dc4c63c4fea32dfa
         adjicon = qta.icon('ei.adjust-alt')
         self.advsearchbtn.setIcon(adjicon)
         self.advsearchbtn.clicked.connect(self.showadvsearchdig)
@@ -172,7 +194,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if folder_path:
             self.pathindexdir.setText(folder_path)
     def tablestyle(self):
-        """Set table styles and column widths."""
         self.tableWidget.verticalHeader().setDefaultSectionSize(30)
         table_header = ["Name", "Path", "Type", "Modification Time", "Size (bytes)"]
         self.tableWidget.setHorizontalHeaderLabels(table_header)
@@ -181,7 +202,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidget.setColumnWidth(col, width)
 
     def update_table(self):
-        """Update table with data from MySQL."""
         if not self.data:
             return
 
@@ -194,7 +214,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidget.setItem(row, 4, QTableWidgetItem(str(entry.get("size", "N/A"))))
 
     def Search(self):
-        """Perform search in the MySQL database."""
         actions = [self.music,self.doc,self.picture,self.video,self.exe,self.compressed]
         enabled_actions = get_enabled_actions(actions)
         filetype = ([action.text() for action in enabled_actions])
@@ -211,22 +230,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             QMessageBox.information(self, "No Results", "No matching files found.")
 
     def showadvsearchdig(self, checked):
-        """Show advanced search dialog."""
         if self.w is None:
-            self.w = loaddialogs.LoadAdvSearch(self)  # Pass main window reference
-            self.w.setAttribute(QtCore.Qt.WA_DeleteOnClose)  # Ensures proper cleanup
+            self.w = loaddialogs.LoadAdvSearch(self)
+            self.w.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.w.show()
-            self.w.destroyed.connect(self.clear_dialog_reference)  # Reset reference when closed
+            self.w.destroyed.connect(self.clear_dialog_reference)
         else:
-            self.w.raise_()  # Bring the window to the front
-            self.w.activateWindow()  # Focus the window
+            self.w.raise_()
+            self.w.activateWindow()
 
     def clear_dialog_reference(self):
-        """Clear dialog reference when it is closed."""
+
         self.w = None
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    # apply_stylesheet(app, theme='dark_purple.xml')
     qdarktheme.setup_theme()
     window = MainWindow()
     window.show()
