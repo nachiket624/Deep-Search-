@@ -2,15 +2,10 @@ import mysql.connector
 import os
 import logging
 from datetime import datetime
+from dbconnection.db_utils import ALLOWED_EXTENSIONS,get_db_connection
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
-
-# Database credentials
-DB_HOST = "localhost"
-DB_USER = os.getenv("DB_USER", "root")  
-DB_PASSWORD = os.getenv("DB_PASSWORD", "1900340220")  # Replace with a secure method
-DB_NAME = "dbdeepsearch"
 
 def validate_date(date_str):
     """Validates and converts a date string to a date object."""
@@ -23,18 +18,13 @@ def validate_date(date_str):
         return None
 
 def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None, 
-               min_size=None, max_size=None, match_case=False, match_whole_word=False, 
+               min_size=None, max_size=None,allthisword =None ,match_case=False, match_whole_word=False, 
                match_diacritics=False, exclude_words=None, 
                match_case_exclude=False, match_whole_word_exclude=False, match_diacritics_exclude=False,
                folder_path=None):
     try:
         # Establish the connection
-        conn = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
+        conn = get_db_connection()
         cursor = conn.cursor()
 
         # Base query and values list
@@ -61,7 +51,22 @@ def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None
                 conditions.append(f"name LIKE %s COLLATE {collation}")
                 values.append(f"%{name_pattern}%")
 
-        # Filter by file type
+        if allthisword:
+            if match_case or match_diacritics:
+                collation = "utf8mb4_bin"  # Case & diacritic sensitive
+            else:
+                collation = "utf8mb4_general_ci"  # Case & diacritic insensitive
+
+            if match_whole_word:
+                # Exact word match
+                conditions.append(f"name COLLATE {collation} = %s")
+                values.append(allthisword)
+            else:
+                # Partial word match
+                conditions.append(f"name COLLATE {collation} LIKE %s")
+                values.append(f"%{allthisword}%")
+
+                
         if file_type:
             conditions.append("type = %s")
             values.append(file_type)
@@ -91,20 +96,20 @@ def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None
         # Exclude words from filename
         if exclude_words:
             for word in exclude_words:
-                collation_exclude = "BINARY" if match_case_exclude or match_diacritics_exclude else "utf8mb4_general_ci"
+                if match_case_exclude or match_diacritics_exclude:
+                    collation_exclude = "utf8mb4_bin"  # Case & diacritic sensitive
+                else:
+                    collation_exclude = "utf8mb4_general_ci"  # Insensitive
+
                 if match_whole_word_exclude:
-                    conditions.append(f"name != %s COLLATE {collation_exclude}")
+                    conditions.append(f"name COLLATE {collation_exclude} != %s")
                     values.append(word)
                 else:
-                    conditions.append(f"name NOT LIKE %s COLLATE {collation_exclude}")
+                    conditions.append(f"name COLLATE {collation_exclude} NOT LIKE %s")
                     values.append(f"%{word}%")
 
-        # Construct the final SQL query
         query = "SELECT id, name, path, type, modification_time, size FROM files WHERE " + " AND ".join(conditions)
-
-        # Execute query
         cursor.execute(query, values)
-        print(format_query(query,values))
         results = [list(row) for row in cursor.fetchall()]  # Convert tuples to lists
 
         # Close resources
@@ -116,20 +121,3 @@ def fetch_data(name_pattern=None, file_type=None, start_date=None, end_date=None
     except mysql.connector.Error as e:
         logging.error("Database error occurred", exc_info=True)
         return []
-
-
-def format_query(query, values):
-    def format_value(v):
-        if isinstance(v, str):
-            return f"'{v}'"
-        elif v is None:
-            return 'NULL'
-        else:
-            return str(v)
-    
-    parts = query.split('%s')
-    full_query = ''
-    for part, val in zip(parts, values + ['']):
-        full_query += part + format_value(val)
-    return full_query
-

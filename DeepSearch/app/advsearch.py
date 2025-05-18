@@ -99,7 +99,6 @@ class Ui_Dialog(object):
         self.startdate.setFrame(False)
         self.startdate.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.startdate.setCalendarPopup(True)
-        self.startdate.setDate(QDate(1900, 1, 1))
 
         self.verticalLayout_2.addWidget(self.startdate)
 
@@ -220,10 +219,10 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_2.addWidget(self.label_3)
 
-        self.lineEdit_3 = QLineEdit(self.frame)
-        self.lineEdit_3.setObjectName(u"lineEdit_3")
+        self.allthisword = QLineEdit(self.frame)
+        self.allthisword.setObjectName(u"allthisword")
 
-        self.horizontalLayout_2.addWidget(self.lineEdit_3)
+        self.horizontalLayout_2.addWidget(self.allthisword)
 
 
         self.verticalLayout_6.addLayout(self.horizontalLayout_2)
@@ -296,10 +295,10 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_8 = QHBoxLayout()
         self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
-        self.lineEdit_6 = QLineEdit(self.frame)
-        self.lineEdit_6.setObjectName(u"lineEdit_6")
+        self.filepathinput = QLineEdit(self.frame)
+        self.filepathinput.setObjectName(u"filepathinput")
 
-        self.horizontalLayout_8.addWidget(self.lineEdit_6)
+        self.horizontalLayout_8.addWidget(self.filepathinput)
 
         self.digadvborwesfile = QPushButton(self.frame)
         self.digadvborwesfile.setObjectName(u"digadvborwesfile")
@@ -308,11 +307,6 @@ class Ui_Dialog(object):
 
 
         self.verticalLayout_9.addLayout(self.horizontalLayout_8)
-
-        self.includesubfolder = QCheckBox(self.frame)
-        self.includesubfolder.setObjectName(u"includesubfolder")
-
-        self.verticalLayout_9.addWidget(self.includesubfolder)
 
 
         self.gridLayout.addLayout(self.verticalLayout_9, 4, 0, 1, 1)
@@ -342,17 +336,19 @@ class Ui_Dialog(object):
 
         self.gridLayout_3.addLayout(self.verticalLayout_5, 0, 0, 1, 1)
 
-        QWidget.setTabOrder(self.filenameinput, self.lineEdit_3)
-        QWidget.setTabOrder(self.lineEdit_3, self.filemachcase)
+        QWidget.setTabOrder(self.filenameinput, self.fileextationinput)
+        QWidget.setTabOrder(self.fileextationinput, self.allthisword)
+        QWidget.setTabOrder(self.allthisword, self.filemachcase)
         QWidget.setTabOrder(self.filemachcase, self.filematchwholeword)
         QWidget.setTabOrder(self.filematchwholeword, self.filematchdiacribcs)
         QWidget.setTabOrder(self.filematchdiacribcs, self.excludewords)
         QWidget.setTabOrder(self.excludewords, self.fileexactphrasematchcase)
         QWidget.setTabOrder(self.fileexactphrasematchcase, self.fileexactmactchwholeword)
         QWidget.setTabOrder(self.fileexactmactchwholeword, self.fileexactmatchdiacribcs)
-        QWidget.setTabOrder(self.fileexactmatchdiacribcs, self.lineEdit_6)
-        QWidget.setTabOrder(self.lineEdit_6, self.includesubfolder)
-        QWidget.setTabOrder(self.includesubfolder, self.digadvborwesfile)
+        QWidget.setTabOrder(self.fileexactmatchdiacribcs, self.phraseinput)
+        QWidget.setTabOrder(self.phraseinput, self.serchphrasebtn)
+        QWidget.setTabOrder(self.serchphrasebtn, self.filepathinput)
+        QWidget.setTabOrder(self.filepathinput, self.digadvborwesfile)
         QWidget.setTabOrder(self.digadvborwesfile, self.startdate)
         QWidget.setTabOrder(self.startdate, self.enddate)
         QWidget.setTabOrder(self.enddate, self.fileminsize)
@@ -376,8 +372,8 @@ class Ui_Dialog(object):
         self.label_7.setText(QCoreApplication.translate("Dialog", u"To", None))
         self.enddate.setDisplayFormat(QCoreApplication.translate("Dialog", u"yyyy/M/d", None))
         self.size.setText(QCoreApplication.translate("Dialog", u"File Size", None))
-        self.label_9.setText(QCoreApplication.translate("Dialog", u"To", None))
-        self.label_8.setText(QCoreApplication.translate("Dialog", u"From", None))
+        self.label_9.setText(QCoreApplication.translate("Dialog", u"From (Bytes)", None))
+        self.label_8.setText(QCoreApplication.translate("Dialog", u"To (Bytes)", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"A word or phrase in the file:", None))
         self.serchphrasebtn.setText("")
         self.label_3.setText(QCoreApplication.translate("Dialog", u"All This Words", None))
@@ -389,7 +385,6 @@ class Ui_Dialog(object):
         self.label_2.setText(QCoreApplication.translate("Dialog", u"File Extension", None))
         self.label_11.setText(QCoreApplication.translate("Dialog", u"Loacated In:", None))
         self.digadvborwesfile.setText("")
-        self.includesubfolder.setText(QCoreApplication.translate("Dialog", u"Include Sub Folder", None))
         self.digadvsearchbtn.setText("")
         self.digadvcancelbtn.setText("")
     # retranslateUi

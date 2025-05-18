@@ -1,7 +1,7 @@
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import *
 from app import advsearch, textresult
-from PySide6.QtWidgets import QTableWidgetItem
+from PySide6.QtWidgets import QTableWidgetItem,QFileDialog
 import qtawesome as qta
 from PySide6.QtCore import Qt
 from dotenv import load_dotenv
@@ -10,18 +10,11 @@ from search import searchtxt,searchdocx,searchpdf
 from app import advancesearch 
 import subprocess
 import platform
+from dbconnection.db_utils import ALLOWED_EXTENSIONS,get_db_connection
 
-load_dotenv()
-DB_HOST = os.getenv("DB_HOST")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
 
-EXTENSION_GROUPS =["",".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".alac",".doc", ".docx", ".pdf",
-                    ".txt", ".xlsx", ".xls", ".ppt", ".pptx", ".odt", ".rtf",".jpg", ".jpeg", ".png", 
-                    ".gif", ".bmp", ".tiff", ".svg", ".webp",".mp4", ".mkv", ".mov", ".avi", ".flv", ".wmv", ".webm", ".mpeg"
-                    ".exe", ".bat", ".sh", ".app", ".msi",".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso"]
 
+EXTENSION_GROUPS = ALLOWED_EXTENSIONS
 
 class LoadTextResult(QtWidgets.QDialog, textresult.Ui_Dialog):
     def __init__(self, phrase=""):
@@ -132,6 +125,7 @@ class LoadAdvSearch(QtWidgets.QDialog, advsearch.Ui_Dialog):
         self.setWindowTitle("Adavance Search")
         browsefile_icon = qta.icon('ph.folder-notch-open-fill', color="yellow")
         self.digadvborwesfile.setIcon(browsefile_icon)
+        self.digadvborwesfile.clicked.connect(self.select_folder)
         search_icon = qta.icon('fa5s.search', color='green')
         self.digadvsearchbtn.setIcon(search_icon)
         self.serchphrasebtn.setIcon(search_icon)
@@ -145,14 +139,23 @@ class LoadAdvSearch(QtWidgets.QDialog, advsearch.Ui_Dialog):
         self.digadvcancelbtn.clicked.connect(self.closeadvsearch)  
         self.digadvsearchbtn.clicked.connect(self.filesearch)
         self.fileextationinput.addItems(EXTENSION_GROUPS)
+    
+    def select_folder(self):
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+        if folder_path:
+            self.filepathinput.setText(folder_path)
        
     def filesearch(self):
         name_pattern = self.filenameinput.text()
         file_type = self.fileextationinput.currentText()
+        folderpath = self.filepathinput.text()
+        # inludesubfolder = self.includesubfolder.isChecked()
+        # print(inludesubfolder)
         start_date = self.startdate.text()
         end_date = self.enddate.text()
         min_size = self.fileminsize.text()
         max_size = self.filemaxsize.text()
+        allthisword = self.allthisword.text()
         match_case = self.filemachcase.isChecked()
         match_whole_word = self.filematchwholeword.isChecked()
         match_diacritics = self.filematchdiacribcs.isChecked()
@@ -161,7 +164,7 @@ class LoadAdvSearch(QtWidgets.QDialog, advsearch.Ui_Dialog):
         match_whole_word_exclude = self.fileexactmactchwholeword.isChecked()
         match_diacritics_exclude = self.fileexactmatchdiacribcs.isChecked()
 
-        advdata = advancesearch.fetch_data(name_pattern,file_type,start_date,end_date,min_size,max_size,match_case,match_whole_word,match_diacritics,exclude_words,match_case_exclude,match_whole_word_exclude,match_diacritics_exclude)
+        advdata = advancesearch.fetch_data(name_pattern,file_type,start_date,end_date,min_size,max_size,allthisword,match_case,match_whole_word,match_diacritics,exclude_words,match_case_exclude,match_whole_word_exclude,match_diacritics_exclude,folderpath)
         if self.w is None or not self.w.isVisible():
             self.w = LoadAdvSearchResult(advdata) 
         else:

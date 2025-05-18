@@ -53,5 +53,3 @@ def search_files(query_str):
     return results_list
 
  # Return results as a list
-
-# print(search_files("my name is nachiket id 9300"))

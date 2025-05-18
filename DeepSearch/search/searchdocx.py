@@ -1,5 +1,13 @@
 from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
+from dbconnection.db_utils import get_db_connection
+import logging
+
+logging.basicConfig(
+    filename='searchdocx.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 def search_files(query_str):
     index_dir = r"./indexfiles/docx_index"
@@ -10,16 +18,44 @@ def search_files(query_str):
         searcher = ix.searcher()
         query = QueryParser("content_preview", ix.schema).parse(query_str)
         results = searcher.search(query, limit=10)
-        
+
+        conn = get_db_connection(use_database=True)
+        if conn is None:
+            print("❌ Failed to connect to the database.")
+            searcher.close()
+            return []
+
+        cursor = conn.cursor()
+        stale_filepaths = []
+
         for result in results:
-            results_list.append([
-                result["filename"],
-                result["filepath"],
-                result["content_preview"]
-            ])
-        
+            filepath = result["filepath"]
+
+            cursor.execute("SELECT COUNT(*) FROM files WHERE path = %s", (filepath,))
+            (count,) = cursor.fetchone()
+
+            if count > 0:
+                results_list.append([
+                    result["filename"],
+                    filepath,
+                    result["content_preview"]
+                ])
+            else:
+                stale_filepaths.append(filepath)
+
         searcher.close()
-    
+        cursor.close()
+        conn.close()
+
+        # Delete stale entries after closing searcher
+        if stale_filepaths:
+            writer = ix.writer()
+            for path in stale_filepaths:
+                writer.delete_by_term('filepath', path)
+            writer.commit()
+
     except Exception as e:
-        print(f"Error during search: {e}")
+        logging.error(f"Error during .docx search: {e}")
+        print(f"⚠️ Error during search: {e}")
+
     return results_list

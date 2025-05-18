@@ -20,4 +20,6 @@ textindex/
 docx_index
 pdf_index
 *.log
+*.json
+*.key
 

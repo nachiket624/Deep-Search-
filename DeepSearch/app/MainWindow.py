@@ -176,14 +176,6 @@ class Ui_MainWindow(object):
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.gridLayout_2 = QGridLayout()
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.gridLayout_2.addItem(self.horizontalSpacer_3, 1, 0, 1, 1)
-
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.gridLayout_2.addItem(self.horizontalSpacer_4, 1, 2, 1, 1)
-
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.formLayout = QFormLayout()
@@ -209,6 +201,16 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.dbpass)
 
+        self.label_3 = QLabel(self.Settings)
+        self.label_3.setObjectName(u"label_3")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
+
+        self.pathindexdir = QLineEdit(self.Settings)
+        self.pathindexdir.setObjectName(u"pathindexdir")
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.pathindexdir)
+
 
         self.verticalLayout_3.addLayout(self.formLayout)
 
@@ -230,6 +232,11 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_4.addWidget(self.btndbconnct)
 
+        self.cancelBtn = QPushButton(self.Settings)
+        self.cancelBtn.setObjectName(u"cancelBtn")
+
+        self.horizontalLayout_4.addWidget(self.cancelBtn)
+
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_4.addItem(self.horizontalSpacer)
@@ -240,13 +247,26 @@ class Ui_MainWindow(object):
 
         self.gridLayout_2.addLayout(self.verticalLayout_3, 1, 1, 1, 1)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.gridLayout_2.addItem(self.verticalSpacer, 2, 1, 1, 1)
+        self.gridLayout_2.addItem(self.horizontalSpacer_4, 1, 3, 1, 1)
 
         self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.gridLayout_2.addItem(self.verticalSpacer_2, 0, 1, 1, 1)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        self.gridLayout_2.addItem(self.verticalSpacer, 2, 1, 1, 1)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_2.addItem(self.horizontalSpacer_3, 1, 0, 1, 1)
+
+        self.openindexdir = QPushButton(self.Settings)
+        self.openindexdir.setObjectName(u"openindexdir")
+
+        self.gridLayout_2.addWidget(self.openindexdir, 1, 2, 1, 1)
 
 
         self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
@@ -331,8 +351,11 @@ class Ui_MainWindow(object):
         self.processlabel.setText(QCoreApplication.translate("MainWindow", u"process info", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Database Username", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Database Password", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Index Dir Path", None))
         self.dbconnectioninfo.setText(QCoreApplication.translate("MainWindow", u"Hello", None))
         self.btndbconnct.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
+        self.cancelBtn.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
+        self.openindexdir.setText("")
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))
         self.menuEdit_2.setTitle(QCoreApplication.translate("MainWindow", u"View", None))

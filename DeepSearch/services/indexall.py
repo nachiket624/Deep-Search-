@@ -1,6 +1,10 @@
 import os
+import sys
 from datetime import datetime
-from dbconnection.db_utils import create_database_if_not_exists,ALLOWED_EXTENSIONS,get_db_connection
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+from dbconnection.db_utils import create_database_if_not_exists,ALLOWED_EXTENSIONS,get_db_connection,create_table
 
 def scan_directory(directory):
     """Scans the directory and updates the database with allowed files."""
@@ -47,6 +51,7 @@ def main():
         print("Invalid directory path!")
         return
     create_database_if_not_exists()
+    create_table()
     scan_directory(directory)
     check_existing_records()
     print("Indexing complete.")

@@ -1,7 +1,11 @@
 import os
+import sys
 import mysql.connector
 from whoosh.index import create_in, open_dir,exists_in
 from whoosh.fields import Schema, TEXT, ID
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
 from dbconnection.db_utils import get_db_connection
 
 # Define Whoosh schema
@@ -10,15 +14,15 @@ schema = Schema(
     filepath=ID(stored=True, unique=True),
     content_preview=TEXT(stored=True)
 )
-user_profile = os.environ.get("USERPROFILE", r"C:\Users\Default")
+user_profile = os.environ.get("USERPROFILE", "C:\\Users\\Default")
 appdata_path = os.path.join(user_profile, "AppData")
-index_dir = r"..\indexfiles\textindex"
+index_dir = "..\indexfiles\textindex"
 def get_excluded_dirs():
     dirs = [
-        os.environ.get("ProgramFiles", r"C:\Program Files"),
-        os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
-        r"C:\Windows",
-        r"C:\PerfLogs",
+        os.environ.get("ProgramFiles", "C:\Program Files"),
+        os.environ.get("ProgramFiles(x86)", "C:\Program Files (x86)"),
+        "C:\Windows",
+        "C:\PerfLogs",
         index_dir,  # root of index dir
         appdata_path
     ]

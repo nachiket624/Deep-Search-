@@ -1,9 +1,13 @@
 import os
+import sys
 import textract
 from docx import Document
 import mysql.connector
 from whoosh.index import create_in, open_dir, exists_in
 from whoosh.fields import Schema, TEXT, ID
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
 from dbconnection.db_utils import get_db_connection
 
 # Reuse same schema as txt
